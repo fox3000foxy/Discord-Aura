@@ -24,14 +24,17 @@ return false
 	localStorage.setItem('avatar_url',document.whForm.avatar_url.value);document.getElementById('image').src=document.whForm.avatar_url.value
 	" alt="Entrez toutes les informations et appuyez sur le bouton 'envoyer'"><br>
 	<input name="username" onchange="localStorage.setItem('username',this.value)" class="username" placeholder="Nom d'utilisateur"><br /><br />
-	Message:<input name="content"><br /><br>
+	Message:<input name="content"><br />
+	<span>Click on a profile de ping him</span><br>
+	<input type="checkbox" id="autoscroll" onclick="localStorage.setItem('autoscroll',this.checked)"> Autoscroll
+	<br><br>
 	<input type="submit">
 </form>
 </table>
 </div>
 <script>
-thisUrl = "https://messagefetcher.herokuapp.com"
-//thisUrl = "http://localhost:3000"
+//thisUrl = "https://messagefetcher.herokuapp.com"
+thisUrl = "http://"+location.host
 selectChannel = document.getElementById("channelNames")
 messageContainer = document.getElementById("messageContainer")
 serverId = document.getElementById("serverId")
@@ -54,8 +57,14 @@ askForServerChannels= function(serverId,starting=false){
 document.whForm.username.value = localStorage.getItem("username")
 document.whForm.avatar_url.value = localStorage.getItem("avatar_url")
 document.getElementById('image').src=localStorage.getItem("avatar_url")
+document.getElementById('autoscroll').checked=JSON.parse(localStorage.getItem("autoscroll"))
 serverId.value = localStorage.getItem("serverId")
 askForServerChannels(localStorage.getItem("serverId"),true)
+avatarChange = 1
+oldUser = null
+setInterval(()=>{
+	if(document.getElementById("autoscroll").checked==true) messageContainer.scrollTop = 10000
+})
 setInterval(()=>{
 	if(selectChannel.value == "") return
 	fetch(thisUrl+"/channelMessages?id="+selectChannel.value)
@@ -64,6 +73,7 @@ setInterval(()=>{
 		messageContainer.innerHTML = ''
 		data.forEach(msg=>{
 			var assets = ''
+			newMessage = ''
 			if(msg.attachment) assets = ' <a href="'+msg.attachment+'" target="_blank">Voir les pièeces jointes</a>'
 			var timestamp = msg.timestamp
 			var date = new Date(timestamp);
@@ -74,7 +84,13 @@ setInterval(()=>{
 			  " "+date.getHours()+
 			  ":"+date.getMinutes()+
 			  ":"+date.getSeconds()
-			messageContainer.innerHTML += '<img src="'+msg.avatar+'" style="width:24px;hight:24px;margin-right:3px;border-radius:16px"><b>'+msg.author+':</b> ('+formattedDate+') '+msg.content+assets+"<br>"
+			if(oldUser!=msg.author) avatarChange=1
+			if(avatarChange==1) {
+				newMessage = `<img src="${msg.avatar}" style="width:24px;hight:24px;margin-right:3px;border-radius:16px"><b onclick="document.whForm.content.value += '<@!${msg.id}>'">${msg.author}</b> (${formattedDate}) <br>`
+			}
+			oldUser = msg.author
+			avatarChange=0
+			messageContainer.innerHTML += newMessage+"<div style='padding-left:45px'>"+msg.content+assets+"</div>"
 		})
 	  })
 },2000)

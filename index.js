@@ -62,7 +62,7 @@ app.get('/serverChannels',(req,res)=>{
 	}))
 })
 app.get('/channelMessages',async (req,res)=>{
-	client.channels.cache.get(req.query.id).messages.fetch({ limit: 20 })
+	client.channels.cache.get(req.query.id).messages.fetch({ limit: 100 })
     .then(async msgs => {
       var fetchedArray = []
 	  msgList = [...msgs].reverse()
@@ -73,7 +73,7 @@ app.get('/channelMessages',async (req,res)=>{
 				  author:msg.author.username,
 				  timestamp: msg.createdTimestamp,
 				  avatar:msg.author.displayAvatarURL(),
-				  bot : msg.author.bot,
+				  id : msg.author.id,
 				  attachment: attachment || '',
 				  content:msg.content
 			   })
