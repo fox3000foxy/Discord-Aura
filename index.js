@@ -1,8 +1,10 @@
 const express = require('express')
 const { Client, Intents } = require('discord.js');
+const cors = require('cors')
 const client = new Client();
 const app = express()
 const port = process.env.PORT || 3000
+app.use(cors())
 
 client.once('ready', () => {
 	console.log('Ready!');
