@@ -39,7 +39,7 @@ selectChannel = document.getElementById("channelNames")
 messageContainer = document.getElementById("messageContainer")
 serverId = document.getElementById("serverId")
 askForServerChannels= function(serverId,starting=false){
-	fetch(thisUrl+"/serverChannels?id="+serverId)
+	fetch(thisUrl+"/serverChannels?id="+serverId+"&limit=20")
 	.then(response => {
 		return response.json()
 	})
