@@ -64,7 +64,7 @@ app.get('/serverChannels',(req,res)=>{
 	}))
 })
 app.get('/channelMessages',async (req,res)=>{
-	client.channels.cache.get(req.query.id).messages.fetch({ limit: 100 })
+	client.channels.cache.get(req.query.id).messages.fetch({ limit: parseInt(req.query.limit) })
     .then(async msgs => {
       var fetchedArray = []
 	  msgList = [...msgs].reverse()
