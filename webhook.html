@@ -76,6 +76,7 @@ socket.on('serverChannels', function(msg) {
 
 
 socket.on('channelMessages', function(data) {
+	avatarChange = 1
 	if(
 		selectChannel.value == "" || 
 		selectChannel.value != data.channelId
