@@ -61,18 +61,19 @@ setInterval(()=>{if(document.getElementById("autoscroll").checked==true) message
 
 socket.on('serverChannels', function(msg) {
 	if(msg.message) return
-	if(msg.guildId!=serverId.value) return
-	selectChannel.innerHTML = ''
-	msg.forEach(channel=>{
-		selectChannel.innerHTML += '<option value="'+channel.id+'">'+channel.name+'</option>'
-	})
-	setTimeout(()=>{
-		if(first==true){
-			first = false;
-			selectChannel.selectedIndex = parseInt(localStorage.getItem("selectedChannel"))
-		}
-		askChannels()
-	},1000)
+	if(msg.guildId==serverId.value) {
+		selectChannel.innerHTML = ''
+		msg.forEach(channel=>{
+			selectChannel.innerHTML += '<option value="'+channel.id+'">'+channel.name+'</option>'
+		})
+		setTimeout(()=>{
+			if(first==true){
+				first = false;
+				selectChannel.selectedIndex = parseInt(localStorage.getItem("selectedChannel"))
+			}
+			askChannels()
+		},1000)
+	}
 });
 
 
