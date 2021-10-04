@@ -64,55 +64,57 @@ function sendChannelMessages(msg) {
   }
 
 io.on('connection', (socket) => {
-  // console.log('a user connected');
-  socket.on('channelMessages', sendChannelMessages);
-  socket.on('serverChannels', (msg) => {
-	var channelsToSend = []
-	if(client.guilds.cache.get(msg.id)==null) {
-		io.emit('serverChannels',{message:"No guild with id "+msg.id+" is connected with the bot"})
-		return
-	}
-	var channels = client.guilds.cache.get(msg.id).channels.cache
-	var keys = Array.from(channels.keys())
-	keys.forEach(key=>{
-		channel = channels.get(key)
-		// console.log(channel.parent)
-		if(channel.type=='text'){
-			channelsToSend.push({
-				name:(channel.parent!=null?channel.parent.name + ": \t":"")+channel.name,
-				id:channel.id,
-			})			
+  socket.on('event', () => {
+	// console.log('a user connected');
+	  socket.on('channelMessages', sendChannelMessages);
+	  socket.on('serverChannels', (msg) => {
+		var channelsToSend = []
+		if(client.guilds.cache.get(msg.id)==null) {
+			io.emit('serverChannels',{message:"No guild with id "+msg.id+" is connected with the bot"})
+			return
 		}
-	})
-	var sortedArray = channelsToSend.sort(function(a, b){
-		if(a.name < b.name) { return -1; }
-		if(a.name > b.name) { return 1; }
-		return 0;
-	})
-	// console.log(sortedArray)
-	io.emit('serverChannels',sortedArray)
+		var channels = client.guilds.cache.get(msg.id).channels.cache
+		var keys = Array.from(channels.keys())
+		keys.forEach(key=>{
+			channel = channels.get(key)
+			// console.log(channel.parent)
+			if(channel.type=='text'){
+				channelsToSend.push({
+					name:(channel.parent!=null?channel.parent.name + ": \t":"")+channel.name,
+					id:channel.id,
+				})			
+			}
+		})
+		var sortedArray = channelsToSend.sort(function(a, b){
+			if(a.name < b.name) { return -1; }
+			if(a.name > b.name) { return 1; }
+			return 0;
+		})
+		// console.log(sortedArray)
+		io.emit('serverChannels',sortedArray)
+	  });
+	  socket.on('wh', async (msg) => {
+		// console.log(req.query)
+		const channel = client.channels.cache.get(msg.channelId);
+		let webhooks = await channel.fetchWebhooks();
+		// console.log([...webhooks].length)
+		if([...webhooks].length == 0) {	
+			await channel.createWebhook('MessageFetcherWebhook', {})
+			webhooks = await channel.fetchWebhooks();
+		}
+		const webhook = webhooks.first();
+		await webhook.send({
+			content: msg.content,
+			username: msg.username,
+			avatarURL: msg.avatar
+		}).then(()=>{
+			io.emit('wh',{message:'sended hook !'})
+		}).catch(e=>{
+			io.emit('wh',{error : e})
+		});
+	  });
+	  socket.on('disconnect', () => {});
   });
-  socket.on('wh', async (msg) => {
-	// console.log(req.query)
-	const channel = client.channels.cache.get(msg.channelId);
-	let webhooks = await channel.fetchWebhooks();
-	// console.log([...webhooks].length)
-	if([...webhooks].length == 0) {	
-		await channel.createWebhook('MessageFetcherWebhook', {})
-		webhooks = await channel.fetchWebhooks();
-	}
-	const webhook = webhooks.first();
-	await webhook.send({
-		content: msg.content,
-		username: msg.username,
-		avatarURL: msg.avatar
-	}).then(()=>{
-		io.emit('wh',{message:'sended hook !'})
-	}).catch(e=>{
-		io.emit('wh',{error : e})
-	});
-  });
-  socket.on('disconnect', () => {});
 });
 
 app.get('/', (req, res) => {res.sendFile(__dirname+'/webhook.html')})
