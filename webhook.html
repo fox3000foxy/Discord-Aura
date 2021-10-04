@@ -63,7 +63,7 @@ socket.on('serverChannels', function(msg) {
 	if(msg.message) return
 	if(msg.guildId==serverId.value) {
 		selectChannel.innerHTML = ''
-		msg.forEach(channel=>{
+		msg.sortedArray.forEach(channel=>{
 			selectChannel.innerHTML += '<option value="'+channel.id+'">'+channel.name+'</option>'
 		})
 		setTimeout(()=>{
