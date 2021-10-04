@@ -17,9 +17,9 @@ client.once('ready', () => {
 	})
 });
 
-client.on('message',(msg)=>{sendChannelMessages({id:msg.channel.id,limit:20})})
-client.on('messageDelete', function(msg){sendChannelMessages({id:msg.channel.id,limit:20})});
-client.on('messageUpdate', function(msg){sendChannelMessages({id:msg.channel.id,limit:20})});
+client.on('message',(msg)=>{sendChannelMessages({id:msg.channel.id,limit:100})})
+client.on('messageDelete', function(msg){sendChannelMessages({id:msg.channel.id,limit:100})});
+client.on('messageUpdate', function(msg){sendChannelMessages({id:msg.channel.id,limit:100})});
 
 function sendChannelMessages(msg) {
 	client.channels.cache.get(msg.id).messages.fetch({ limit: parseInt(msg.limit) })
@@ -33,9 +33,9 @@ function sendChannelMessages(msg) {
 				  arrayOfMentions = [...msg.mentions.users]
 				  arrayOfMentions.forEach((user,i)=>{
 					  if(formattedMsg.split("<@!"+user[0]+">").length>0)
-					  formattedMsg = formattedMsg.split("<@!"+user[0]+">").join(`<mention onclick='document.whForm.content.value+="<@${user[0]}>"'>@${msg.mentions.users.get(user[0]).username}</mention>`)
+					  formattedMsg = formattedMsg.split("<@!"+user[0]+">").join(`<mention onclick="document.whForm.content.value += '${"<@!"+user[0]+">"}'">@${msg.mentions.users.get(user[0]).username}</mention>`)
 					  if(formattedMsg.split("<@"+user[0]+">").length>0)
-					  formattedMsg = formattedMsg.split("<@"+user[0]+">").join(`<mention onclick='document.whForm.content.value+="<@${user[0]}>"'>@${msg.mentions.users.get(user[0]).username}</mention>`)
+					  formattedMsg = formattedMsg.split("<@"+user[0]+">").join(`<mention onclick="document.whForm.content.value += '${"<@!"+user[0]+">"}'">@${msg.mentions.users.get(user[0]).username}</mention>`)
 				  })
 				  // memberColor = ""
 				  // msg.guild.members.fetch(msg.author.id).then(async member => {
@@ -49,6 +49,7 @@ function sendChannelMessages(msg) {
 					  // color: memberColor,
 					  id : msg.author.id,
 					  messageId: msg.id,
+					  bot: (msg.author.bot && msg.webhookID==null),
 					  attachment: attachment || '',
 					  content: formattedMsg,
 					  editedTimestamp: msg.editedTimestamp,
@@ -114,8 +115,8 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {});
 });
 
-app.get('/', (req, res) => {res.redirect('webhook')})
-app.get('/webhook', (req, res) => {res.sendFile(__dirname+'/webhook.html')})
+app.get('/', (req, res) => {res.sendFile(__dirname+'/webhook.html')})
+app.get('/bot.png', (req, res) => {res.sendFile(__dirname+'/bot.png')})
 app.get('/invite', (req, res) => {res.redirect('https://discord.com/api/oauth2/authorize?client_id=893025754760249397&permissions=8&scope=bot')})
 // Login to Discord with your client's token
 client.login("ODkzMDI1NzU0NzYwMjQ5Mzk3."+"YVVdCw.Hmt_YlY2wNpJNgFqzov1ORg8iEQ")

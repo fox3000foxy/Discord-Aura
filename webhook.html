@@ -47,7 +47,7 @@ selectChannel = document.getElementById("channelNames")
 messageContainer = document.getElementById("messageContainer")
 serverId = document.getElementById("serverId")
 askForServerChannels= function(serverId){socket.emit('serverChannels',{id:serverId})}
-askChannels = function (){socket.emit('channelMessages',{id:selectChannel.value,limit:20})}
+askChannels = function (){socket.emit('channelMessages',{id:selectChannel.value,limit:100})}
 
 
 document.whForm.username.value = localStorage.getItem("username")
@@ -76,18 +76,17 @@ socket.on('serverChannels', function(msg) {
 
 
 socket.on('channelMessages', function(data) {
-	console.log(data)
 	if(
 		selectChannel.value == "" || 
 		selectChannel.value != data.channelId
 	) return
 	messageContainer.innerHTML = ''
 	data.messageArray.forEach(msg=>{
-		var assets = ''
-		newMessage = ''
-		edited = ''
+	
+		var assets = '',newMessage = '',edited = '', bot = ''
 		if(msg.attachment) assets = ' <a href="'+msg.attachment+'" target="_blank">Voir les pièeces jointes</a>'
 		if(msg.editedTimestamp!="0") edited = 'modified '
+		if(msg.bot==true) bot = '\t<img src="bot.png">'
 		var timestamp = msg.timestamp
 		var date = new Date(timestamp);
 		var formattedDate = date.getDate()+
@@ -101,7 +100,7 @@ socket.on('channelMessages', function(data) {
 			newMessage = `
 				<div style="margin-bottom:2px;">
 					<img src="${msg.avatar}" style="width:32px;height:32px;margin-right:3px;border-radius:24px">
-					<b onclick="document.whForm.content.value += '<@!${msg.id}>'" style="font-size:16px">${msg.author}</b>
+					<b onclick="document.whForm.content.value += '<@!${msg.id}>'" style="font-size:16px">${msg.author}${bot}</b>
 					(${formattedDate})
 				</div>
 			`
