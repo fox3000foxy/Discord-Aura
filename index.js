@@ -90,7 +90,7 @@ io.on('connection', (socket) => {
 		return 0;
 	})
 	// console.log(sortedArray)
-	io.emit('serverChannels',sortedArray)
+	io.emit('serverChannels',{sortedArray,guildId:msg.id})
   });
   socket.on('wh', async (msg) => {
 	// console.log(req.query)

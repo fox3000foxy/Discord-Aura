@@ -61,6 +61,7 @@ setInterval(()=>{if(document.getElementById("autoscroll").checked==true) message
 
 socket.on('serverChannels', function(msg) {
 	if(msg.message) return
+	if(msg.guildId!=serverId.value) return
 	selectChannel.innerHTML = ''
 	msg.forEach(channel=>{
 		selectChannel.innerHTML += '<option value="'+channel.id+'">'+channel.name+'</option>'
