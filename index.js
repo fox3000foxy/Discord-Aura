@@ -104,7 +104,7 @@ io.on('connection', (socket) => {
 	await webhook.send({
 		content: msg.content,
 		username: msg.username,
-		avatarURL: msg.avatar_url
+		avatarURL: msg.avatar
 	}).then(()=>{
 		io.emit('wh',{message:'sended hook !'})
 	}).catch(e=>{
