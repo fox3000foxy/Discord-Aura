@@ -112,10 +112,7 @@ socket.on('channelMessages', function(data) {
   })
 });
 socket.on('wh', function(data) {
-	if(data.error) alert(data.error.message+"\nCan you copy your webhook URL ?")
-});
-socket.on('wh', function(data) {
-	if(data.error) alert(data.error.message+"\nCan you copy your webhook URL ?")
+	if(data.error) alert("Error:\n"+data.error.message)
 });
 
 function linkify(inputText) {

@@ -33,9 +33,9 @@ function sendChannelMessages(msg) {
 				  arrayOfMentions = [...msg.mentions.users]
 				  arrayOfMentions.forEach((user,i)=>{
 					  if(formattedMsg.split("<@!"+user[0]+">").length>0)
-					  formattedMsg = formattedMsg.split("<@!"+user[0]+">").join("<mention>@"+msg.mentions.users.get(user[0]).username+"</mention>")
+					  formattedMsg = formattedMsg.split("<@!"+user[0]+">").join(`<mention onclick='document.whForm.content.value+="${user[0]}"'>@${msg.mentions.users.get(user[0]).username}</mention>`)
 					  if(formattedMsg.split("<@"+user[0]+">").length>0)
-					  formattedMsg = formattedMsg.split("<@"+user[0]+">").join("<mention>@"+msg.mentions.users.get(user[0]).username+"</mention>")
+					  formattedMsg = formattedMsg.split("<@"+user[0]+">").join(`<mention onclick='document.whForm.content.value+="${user[0]}"'>@${msg.mentions.users.get(user[0]).username}</mention>`)
 				  })
 				  // memberColor = ""
 				  // msg.guild.members.fetch(msg.author.id).then(async member => {
