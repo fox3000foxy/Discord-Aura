@@ -1,3 +1,4 @@
+<html class="theme-dark">
 <title>Aura UI</title>
 <div align="center">
 	<table>
@@ -12,7 +13,9 @@
 		this.content.value=""
 		return false
 		' method="GET" name="whForm">
-		<div id="messageContainer" style="border:1px solid white; text-align:left;height:50%;overflow-y:scroll;padding:10px; width:75%;background-color: #2f3136;">Messages loading... Please Wait</div>
+		<div id="messageContainer" style="border:1px solid white; text-align:left;height:50%;overflow-y:scroll;padding:10px; width:75%;background-color: #2f3136;display:block;   position: relative;margin-top:10px">
+			Messages loading... Please Wait
+		</div>
 		<input name="content" style="width:76.75%" placeholder="Envoyez un message..."><br />
 		<!-- Message: -->
 		<!-- <br /> -->
@@ -23,7 +26,7 @@
 			askForServerChannels(this.value);
 		" type="number"><br>
 		Salon: 
-		<select id="channelNames" onchange="
+		<select id="channelNames" multiple onchange="
 			localStorage.setItem('selectedChannel',this.selectedIndex);
 			askChannels();
 		"></select><br /><br />
@@ -91,7 +94,6 @@ socket.on('channelMessages', function(data) {
 	) return
 	messageContainer.innerHTML = ''
 	data.messageArray.forEach(msg=>{
-	
 		var assets = '',newMessage = '',edited = '', bot = ''
 		if(msg.attachment) assets = ' <a href="'+msg.attachment+'" target="_blank">Voir les pièeces jointes</a>'
 		if(msg.editedTimestamp!="0") edited = 'modified '
@@ -105,18 +107,9 @@ socket.on('channelMessages', function(data) {
 		  ":"+date.getMinutes()+
 		  ":"+date.getSeconds()
 		if(oldUser!=msg.author) avatarChange=1
-		if(avatarChange==1) {
-			newMessage = `
-				<div style="margin-bottom:2px;">
-					<img src="${msg.avatar}" style="width:32px;height:32px;margin-right:3px;border-radius:24px">
-					<b onclick="document.whForm.content.value += '<@!${msg.id}>'" style="font-size:16px">${msg.author}${bot}</b>
-					(${formattedDate})
-				</div>
-			`
-		}
 		oldUser = msg.author
+		messageContainer.innerHTML += createMessageObject(msg.author,msg.avatar,formattedDate,msg.id,msg.content,msg.messageId,!!avatarChange,bot)
 		avatarChange=0
-		messageContainer.innerHTML += newMessage+"<div style='padding-left:65px' class='"+edited+"' id='"+msg.messageId+"'>"+linkify(msg.content)+assets+"</div>"
   })
 });
 socket.on('wh', function(data) {
@@ -135,7 +128,25 @@ function linkify(inputText) {
     return replacedText;
 }
 socket.emit('serverChannels',{id:serverIdValue})
+
+function createMessageObject(name,image,date,id,message,messageId,avatarWrapper,bot){
+	var avatarWrapperHTML = `
+		<h2 class="header-23xsNx" aria-describedby="reply-context-894947665257824319" aria-labelledby="message-username-894947665257824319 message-timestamp-894947665257824319">
+			<img src="${image}" aria-hidden="true" class="avatar-1BDn8e clickable-1bVtEA" alt=" " onclick="document.whForm.content.value+='<@${id}>'">
+			<span id="message-username-894947665257824319" class="headerText-3Uvj1Y"><span class="username-1A8OIy desaturateUserColors-1gar-1 clickable-1bVtEA" aria-controls="popout_623" aria-expanded="false" role="button" tabindex="0" style="color: white;">${name}</span></span>${bot}<span class="timestamp-3ZCmNB timestampInline-yHQ6fX"><time aria-label="Aujourd’hui à 16:02" id="message-timestamp-894947665257824319" datetime="2021-10-05T14:02:30.721Z"><i class="separator-2nZzUB" aria-hidden="true"> — </i>(${date})</time></span>
+		</h2>
+	`
+	<!-- console.log(avatarWrapper) -->
+	return `
+		<div class="contents-2mQqc9">
+			${avatarWrapper?avatarWrapperHTML:""}
+			<div id="${messageId}" class="markup-2BOw-j messageContent-2qWWxC">${message}</div>
+		</div>
+		 `
+}
 </script>
+			<!-- ${avatarWrapper==true?'<div class="contents-2mQqc9" role="document"><img src="'+image+'" aria-hidden="true" class="avatar-1BDn8e clickable-1bVtEA" alt=" "><h2 class="header-23xsNx" aria-describedby="reply-context-885042669586370591"><span class="headerText-3Uvj1Y"><span class="username-1A8OIy desaturateUserColors-1gar-1 clickable-1bVtEA" aria-controls="popout_333" aria-expanded="false" role="button" tabindex="0">'+name+'</span></span><span class="timestamp-3ZCmNB timestampInline-yHQ6fX"><time aria-label="" datetime=""><i class="separator-2nZzUB" aria-hidden="true"> — </i>'+date+'</time></span></h2>':''}<div class="markup-2BOw-j messageContent-2qWWxC">${message}</div></div> -->
+<link rel="stylesheet" href="style.css">
 <style type="text/css">
 	body {
 		color: white;
@@ -158,4 +169,14 @@ socket.emit('serverChannels',{id:serverIdValue})
 	}
 	.hidden {position:absolute;top:-1000px}
 	.username{background:none;border:none;color:white;text-align:center}
+	.messageContent-2qWWxC {
+		position:relative;
+		left:64px
+	}
+	.username-1A8OIy {
+		margin-left:60px;
+	}
+	.header-23xsNx {margin-top:10px}
 </style>
+
+</html>

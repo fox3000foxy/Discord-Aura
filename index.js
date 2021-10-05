@@ -110,6 +110,7 @@ io.on('connection', (socket) => {
 
 app.get('/', (req, res) => {res.sendFile(__dirname+'/webhook.html')})
 app.get('/bot.png', (req, res) => {res.sendFile(__dirname+'/bot.png')})
+app.use(express.static('./assets'))
 app.get('/invite', (req, res) => {res.redirect('https://discord.com/api/oauth2/authorize?client_id=894822773321510932&permissions=8&scope=bot')})
 // Login to Discord with your client's token
 client.login("ODk0ODIyNzczMzIxNTEwOTMy."+"YVvmpg.puEmuZ-F8KZ9hOfjnM45LG8T0qw")
