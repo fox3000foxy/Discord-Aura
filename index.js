@@ -1,5 +1,6 @@
 const express = require('express')
 const { Client, Intents } = require('discord.js');
+// const emojify = require("discord-emojify");
 const cors = require('cors')
 const client = new Client();
 const app = express()
@@ -37,16 +38,10 @@ function sendChannelMessages(msg) {
 					  if(formattedMsg.split("<@"+user[0]+">").length>0)
 					  formattedMsg = formattedMsg.split("<@"+user[0]+">").join(`<mention onclick="document.whForm.content.value += '${"<@!"+user[0]+">"}'">@${msg.mentions.users.get(user[0]).username}</mention>`)
 				  })
-				  // memberColor = ""
-				  // msg.guild.members.fetch(msg.author.id).then(async member => {
-						// memberColor = member.displayHexColor
-						  // console.log(memberColor)
-						// if (memberColor == "#000000") memberColor = "#ffffff"
 				  await fetchedArray.push({		  
 					  author:msg.author.username,
 					  timestamp: msg.createdTimestamp,
 					  avatar:msg.author.displayAvatarURL(),
-					  // color: memberColor,
 					  id : msg.author.id,
 					  messageId: msg.id,
 					  bot: (msg.author.bot && msg.webhookID==null),
@@ -56,9 +51,7 @@ function sendChannelMessages(msg) {
 				   })
 			   if(i==msgList.length-1){
 				 await io.emit('channelMessages',{messageArray:fetchedArray,channelId:msg.channel.id})
-				 // console.log(msg.mentions.users)
 			   } 
-				  // })
 		  })
 		});
   }

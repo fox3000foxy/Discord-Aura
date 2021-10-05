@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "cors": "^2.8.5",
+    "discord-emojify": "^1.0.9",
     "discord.js": "^12.5.3",
     "express": "^4.17.1",
     "socket.io": "^4.2.0"

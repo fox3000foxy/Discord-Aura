@@ -12,9 +12,14 @@
 		this.content.value=""
 		return false
 		' method="GET" name="whForm">
-		<div id="messageContainer" style="border:1px solid white; text-align:left;height:50%;overflow-y:scroll;padding:10px; width:75%;background-color: #2f3136;">Messages loading... Please Wait</div><br /><br />
+		<div id="messageContainer" style="border:1px solid white; text-align:left;height:50%;overflow-y:scroll;padding:10px; width:75%;background-color: #2f3136;">Messages loading... Please Wait</div>
+		<input name="content" style="width:76.75%" placeholder="Envoyez un message..."><br />
+		<!-- Message: -->
+		<!-- <br /> -->
+		<br />
 		Id du serveur: <input id="serverId" onchange="
 			localStorage.setItem('serverId',this.value);
+			changing = 1;
 			askForServerChannels(this.value);
 		" type="number"><br>
 		Salon: 
@@ -28,9 +33,8 @@
 		if(linkOfPP != null)
 		document.whForm.avatar_url.value = linkOfPP
 		localStorage.setItem('avatar_url',document.whForm.avatar_url.value);document.getElementById('image').src=document.whForm.avatar_url.value
-		" alt="Photo de profile"><br>
+		" alt="Photo de profile" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'"><br>
 		<input name="username" onchange="localStorage.setItem('username',this.value)" class="username" placeholder="Nom d'utilisateur"><br /><br />
-		Message:<input name="content"><br />
 		<span>Cliquez sur un profil ou une mention pour mentionner</span><br>
 		<input type="checkbox" id="autoscroll" checked="true"> Autoscroll
 		<br><br>
@@ -42,6 +46,7 @@
 <script>
 serverIdValue = location.href.indexOf('?id=')!=-1?location.href.split('?id=')[1]:localStorage.getItem("serverId")
 first = true;
+changing = 1;
 var socket = io();
 selectChannel = document.getElementById("channelNames")
 messageContainer = document.getElementById("messageContainer")
@@ -60,7 +65,8 @@ oldUser = null
 setInterval(()=>{if(document.getElementById("autoscroll").checked==true) messageContainer.scrollTop = 10000})
 
 socket.on('serverChannels', function(msg) {
-	if(msg.message) return
+	if(msg.message || changing==0) return
+	changing = 0
 	if(msg.guildId==serverId.value) {
 		selectChannel.innerHTML = ''
 		msg.sortedArray.forEach(channel=>{
