@@ -1,173 +1,15 @@
 <html class="theme-dark">
 <title>Aura UI</title>
-<div align="center">
-	<table>
-		<form onsubmit='
-		if(this.content.value==""){event.preventDefault()};
-		socket.emit("wh",{
-			username: document.whForm.username.value,
-			avatar: document.whForm.avatar_url.value,
-			content: document.whForm.content.value,
-			channelId: selectChannel.value
-		})
-		this.content.value=""
-		return false
-		' method="GET" name="whForm">
-		<div id="messageContainer" style="text-align:left;height:50%;overflow-y:scroll;padding:10px; width:75%;background-color: #2f3136;display:block; position: absolute;top:0;left:25%">
-			Messages loading... Please Wait
-		</div>
-		<input name="content" style="width:75%;position:absolute;left:25%;top:calc( 50% + 20px )" placeholder="Envoyez un message..."><br />
-		<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-		<!-- Message: -->
-		<!-- <br /> -->
-		<br />
-		Id du serveur: <input id="serverId" onchange="
-			localStorage.setItem('serverId',this.value);
-			changing = 1;
-			askForServerChannels(this.value);
-		" type="number"><br>
-		<select id="channelNames" multiple onchange="
-			localStorage.setItem('selectedChannel',this.selectedIndex);
-			askChannels();
-		" style="
-			position:absolute;
-			left:10%;
-			width:15%;
-			top:0;
-			height:calc( 45% );
-			background:#202225;
-			color:white;
-		"></select><br /><br />
-		Lien de la photo de profile: <input name="avatar_url" onchange="localStorage.setItem('avatar_url',this.value);document.getElementById('image').src=this.value"><br />
-		<br>
-		<div style="position:absolute;left:10%;top:45%;background:#36393f;width:15%;height:calc(5% + 43px)">
-		<br>
-			<img id="image" width="32px" height="32px" onclick="
-			linkOfPP = prompt('Lien de la photo de profile','')
-			if(linkOfPP != null)
-			document.whForm.avatar_url.value = linkOfPP
-			localStorage.setItem('avatar_url',document.whForm.avatar_url.value);document.getElementById('image').src=document.whForm.avatar_url.value
-			" alt="Photo de profile" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'"><br>
-			<input name="username" onchange="localStorage.setItem('username',this.value)" class="username" placeholder="Nom d'utilisateur"><br /><br />
-		</div>
-		<span>Cliquez sur un profil ou une mention pour mentionner</span><br>
-		<input type="checkbox" id="autoscroll" checked="true"> Autoscroll
-		<br><br>
-		<input type="submit">
-	</form>
-</table>
-</div>
-<script src="/socket.io/socket.io.js"></script>
-<script>
-serverIdValue = location.href.indexOf('?id=')!=-1?location.href.split('?id=')[1]:localStorage.getItem("serverId")
-first = true;
-changing = 1;
-var socket = io();
-selectChannel = document.getElementById("channelNames")
-messageContainer = document.getElementById("messageContainer")
-serverId = document.getElementById("serverId")
-askForServerChannels= function(serverId){socket.emit('serverChannels',{id:serverId})}
-askChannels = function (){socket.emit('channelMessages',{id:selectChannel.value,limit:100})}
-
-document.whForm.username.value = localStorage.getItem("username")
-document.whForm.avatar_url.value = localStorage.getItem("avatar_url")
-document.getElementById('image').src=localStorage.getItem("avatar_url")
-serverId.value = serverIdValue
-askForServerChannels(localStorage.getItem("serverId"),true)
-avatarChange = 1
-oldUser = null
-setInterval(()=>{if(document.getElementById("autoscroll").checked==true) messageContainer.scrollTop = 10000})
-
-socket.on('serverChannels', function(msg) {
-	if(msg.message || changing==0) return
-	changing = 0
-	category = []
-	if(msg.guildId==serverId.value) {
-		selectChannel.innerHTML = ''
-		msg.sortedArray.forEach(channel=>{
-			if(channel.name.indexOf(": ")!=-1) 
-			{ 
-				channel.name = channel.name.split(": ")[1]
-				//category[channel.name.split(": ")[0]][channel.name] = channel.id
-			}
-			selectChannel.innerHTML += '<option value="'+channel.id+'">'+channel.name+'</option>'
-		})
-		setTimeout(()=>{
-			if(first==true){
-				first = false;
-				selectChannel.selectedIndex = parseInt(localStorage.getItem("selectedChannel"))
-			}
-			askChannels()
-		},1000)
-	}
-});
-
-socket.on('channelMessages', function(data) {
-	avatarChange = 1
-	if(
-		selectChannel.value == "" || 
-		selectChannel.value != data.channelId
-	) return
-	messageContainer.innerHTML = ''
-	data.messageArray.forEach(msg=>{
-		var assets = '',newMessage = '',edited = '', bot = ''
-		if(msg.attachment) assets = ' <a href="'+msg.attachment+'" target="_blank">Voir les pièeces jointes</a>'
-		if(msg.editedTimestamp!="0") edited = 'modified '
-		if(msg.bot==true) bot = '\t<img src="bot.png">'
-		var timestamp = msg.timestamp
-		var date = new Date(timestamp);
-		var formattedDate = date.getDate()+
-		  "/"+(date.getMonth()+1)+
-		  "/"+date.getFullYear()+
-		  " "+date.getHours()+
-		  ":"+date.getMinutes()+
-		  ":"+date.getSeconds()
-		if(oldUser!=msg.author) avatarChange=1
-		oldUser = msg.author
-		messageContainer.innerHTML += createMessageObject(msg.author,msg.avatar,formattedDate,msg.id,msg.content,msg.messageId,!!avatarChange,bot)
-		avatarChange=0
-  })
-});
-socket.on('wh', function(data) {
-	if(data.error) alert("Error:\n"+data.error.message)
-});
-
-function linkify(inputText) {
-    var replacedText, replacePattern1, replacePattern2, replacePattern3;
-    replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
-    replacedText = inputText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
-    replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
-    replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
-    replacePattern3 = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
-    replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
-
-    return replacedText;
-}
-socket.emit('serverChannels',{id:serverIdValue})
-
-function createMessageObject(name,image,date,id,message,messageId,avatarWrapper,bot){
-	var avatarWrapperHTML = `
-		<h2 class="header-23xsNx" aria-describedby="reply-context-894947665257824319" aria-labelledby="message-username-894947665257824319 message-timestamp-894947665257824319">
-			<img src="${image}" aria-hidden="true" class="avatar-1BDn8e clickable-1bVtEA" alt=" " onclick="document.whForm.content.value+='<@${id}>'">
-			<span id="message-username-894947665257824319" class="headerText-3Uvj1Y"><span class="username-1A8OIy desaturateUserColors-1gar-1 clickable-1bVtEA" aria-controls="popout_623" aria-expanded="false" role="button" tabindex="0" style="color: white;">${name}</span></span>${bot}<span class="timestamp-3ZCmNB timestampInline-yHQ6fX"><time aria-label="Aujourd’hui à 16:02" id="message-timestamp-894947665257824319" datetime="2021-10-05T14:02:30.721Z"><i class="separator-2nZzUB" aria-hidden="true"> — </i>(${date})</time></span>
-		</h2>
-	`
-	<!-- console.log(avatarWrapper) -->
-	return `
-		<div class="contents-2mQqc9">
-			${avatarWrapper?avatarWrapperHTML:""}
-			<div id="${messageId}" class="markup-2BOw-j messageContent-2qWWxC">${message}</div>
-		</div>
-		 `
-}
-</script>
-			<!-- ${avatarWrapper==true?'<div class="contents-2mQqc9" role="document"><img src="'+image+'" aria-hidden="true" class="avatar-1BDn8e clickable-1bVtEA" alt=" "><h2 class="header-23xsNx" aria-describedby="reply-context-885042669586370591"><span class="headerText-3Uvj1Y"><span class="username-1A8OIy desaturateUserColors-1gar-1 clickable-1bVtEA" aria-controls="popout_333" aria-expanded="false" role="button" tabindex="0">'+name+'</span></span><span class="timestamp-3ZCmNB timestampInline-yHQ6fX"><time aria-label="" datetime=""><i class="separator-2nZzUB" aria-hidden="true"> — </i>'+date+'</time></span></h2>':''}<div class="markup-2BOw-j messageContent-2qWWxC">${message}</div></div> -->
 <link rel="stylesheet" href="style.css">
 <style type="text/css">
 	body {
 		color: white;
 		background-color: #101010;
 		font-size:1em;
+	}
+	select{
+		padding-top:8px;
+		padding-bottom:8px;
 	}
 	mention {
 		background:hsla(235,calc(var(--saturation-factor, 1)*85.6%),64.7%,0.3);
@@ -196,6 +38,232 @@ function createMessageObject(name,image,date,id,message,messageId,avatarWrapper,
 	::-webkit-scrollbar {
 		display: none;
 	}
+	.serverIcon {
+		margin-top:16px;
+		width: 48px;
+		height: 48px;
+		border-radius: 24px;
+	}
+	option {
+		padding-left:24px;
+	}
 </style>
+<div align="center">
+	<table>
+		<form onsubmit='
+		if(this.content.value==""){event.preventDefault()};
+		socket.emit("wh",{
+			username: document.whForm.username.value,
+			avatar: document.whForm.avatar_url.value,
+			content: document.whForm.content.value,
+			channelId: selectChannel.value
+		})
+		this.content.value=""
+		return false
+		' method="GET" name="whForm">
+		<div id="serverList" style="position:absolute;left:0;top:0;background:#2f3136;width:64px;height:100%"></div>
+		<div id="messageContainer" onscroll="autoScrollUpdate()" style="text-align:left;height:calc(100% - 43px);overflow-y:scroll;padding:10px; width:75%;background-color: #2f3136;display:block; position: absolute;top:0;left:25%">
+			Messages loading... Please Wait
+		</div>
+		<div style="position:absolute;top:-1000px">
+			Lien de la photo de profile: <input name="avatar_url" onchange="localStorage.setItem('avatar_url',this.value);document.getElementById('image').src=this.value"><br />
+			Id du serveur: <input id="serverId" onchange="
+				localStorage.setItem('serverId',this.value);
+				changing = 1;
+				askForServerChannels(this.value);
+			" type="number"><br>
+			<input type="checkbox" id="autoscroll" checked="true"> Autoscroll
+		</div>
+		<select id="channelNames" multiple onchange="
+			localStorage.setItem('selectedChannel',this.selectedIndex);
+			askChannels();
+		" style="
+			position:absolute;
+			left:64px;
+			width:calc(25% - 64px);
+			top:0;
+			height:calc( 85% + 43px );
+			background:#202225;
+			border-color:#202225;
+			color:white;
+		"></select><br /><br />
+		<input name="content" style="width:75%;position:absolute;left:25%;bottom: 0px" placeholder="Envoyez un message... Cliquez sur un profil ou une mention pour mentionner..."><br />
+		<div style="text-align:center;position:absolute;left:64px;bottom:0;background:#36393f;width:calc(25% - 64px);height:calc(15% - 43px)">
+			<br>
+			<img id="image" width="32px" height="32px" onclick="
+			linkOfPP = prompt('Lien de la photo de profile',this.src)
+			if(linkOfPP != null)
+			document.whForm.avatar_url.value = linkOfPP
+			localStorage.setItem('avatar_url',document.whForm.avatar_url.value);document.getElementById('image').src=document.whForm.avatar_url.value
+			" alt="Photo de profile" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'"><br>
+			<input name="username" onchange="localStorage.setItem('username',this.value)" class="username" placeholder="Nom d'utilisateur"><br /><br />
+		</div>
+		<input type="submit">
+	</form>
+</table>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+var socket = io();
+if(localStorage.serverList == undefined)
+	localStorage.setItem('serverList',"[]")
+serverIdValue = location.href.indexOf('?id=')!=-1?location.href.split('?id=')[1]:localStorage.getItem("serverId")
+first = true;
+changing = 1;
+selectChannel = document.getElementById("channelNames")
+messageContainer = document.getElementById("messageContainer")
+serverListElem = document.getElementById("serverList")
+serverId = document.getElementById("serverId")
+askForServerChannels= function(serverId){socket.emit('serverChannels',{id:serverId})}
+askChannels = function (){socket.emit('channelMessages',{id:selectChannel.value,limit:100})}
 
+document.whForm.username.value = localStorage.getItem("username")
+document.whForm.avatar_url.value = localStorage.getItem("avatar_url")
+document.getElementById('image').src=localStorage.getItem("avatar_url")
+serverId.value = serverIdValue
+askForServerChannels(localStorage.getItem("serverId"),true)
+autoscroll = document.getElementById("autoscroll")
+avatarChange = 1
+autoscrollBool = true
+function autoScrollUpdate(){
+	if(messageContainer.scrollHeight - messageContainer.scrollTop == messageContainer.offsetHeight) 
+	{autoscroll.checked = true}else {autoscroll.checked = false}
+}
+
+serverList = {}
+socket.emit("server",JSON.parse(localStorage.getItem("serverList")))
+socket.on("server",(servers)=>{
+	if(servers.length!=0) {
+		servers.forEach((server)=>{
+			console.log(server)
+			var alt = server.name.match(/\b(\w)/g).join('')
+			serverListElem.innerHTML += `
+				<img onclick="
+					serverId.value = '${server.id}'
+					localStorage.setItem('serverId',serverId.value);
+					changing = 1;
+					askForServerChannels(serverId.value);
+				" class="serverIcon" ${server.iconUrl!=null?'src="'+server.iconUrl+'"':''} title="${alt}">
+			`
+			serverList[server.id] = server
+		})
+	}
+	serverListElem.innerHTML += `
+		<img onclick="
+			result = prompt('Type your server ID','');
+			serverId.value = parseInt(result);
+			askForServerChannels(serverId.value);
+			localStorage.setItem('serverId',parseInt(result));
+			serverListJSON = JSON.parse(localStorage.getItem('serverList'))
+			if(serverListJSON.indexOf(result)==-1)
+				serverListJSON.push(result)
+			localStorage.setItem('serverList',JSON.stringify(serverListJSON))
+			location.reload()
+		" class="serverIcon" src="add.png">
+	`
+})
+
+oldUser = null
+socket.on('serverChannels', function(msg) {
+	if(msg.message || changing==0) return
+	changing = 0
+	category = []
+	actualCategory = ''
+	if(msg.guildId==serverId.value) {
+		selectChannel.innerHTML = ''
+		msg.sortedArray.forEach(channel=>{
+			if(channel.name.indexOf(": ")!=-1) 
+			{ 
+				if(actualCategory != channel.name.split(": ")[0]){
+					actualCategory = channel.name.split(": ")[0]
+					selectChannel.innerHTML += '</optgroup>'
+					selectChannel.innerHTML += '<optgroup label="'+actualCategory+'">'
+				}
+				channel.name = channel.name.split(": ")[1]
+				//category[channel.name.split(": ")[0]][channel.name] = channel.id
+			}
+			selectChannel.innerHTML += '<option value="'+channel.id+'">'+channel.name+'</option>'
+		})
+		setTimeout(()=>{
+			if(first==true){
+				first = false;
+				selectChannel.selectedIndex = parseInt(localStorage.getItem("selectedChannel"))
+			}
+			askChannels()
+		},1000)
+	}
+});
+
+setInterval(()=>{
+  	if(autoscroll.checked==true)
+		messageContainer.scrollTop = 100000
+})
+
+function addZero(number){
+	return ('0' + number).slice(-2)
+}
+
+socket.on('channelMessages', function(data) {
+	avatarChange = 1
+	if(
+		selectChannel.value == "" || 
+		selectChannel.value != data.channelId
+	) return
+	messageContainer.innerHTML = ''
+	data.messageArray.forEach(msg=>{
+		var assets = '',newMessage = '',edited = '', bot = ''
+		if(msg.attachment) assets = ' <a href="'+msg.attachment+'" target="_blank">Voir les pièeces jointes</a>'
+		if(msg.editedTimestamp!="0") edited = 'modified '
+		if(msg.bot==true) bot = '\t<img src="bot.png">'
+		var timestamp = msg.timestamp
+		var date = new Date(timestamp);
+		var now = new Date();
+		if(date.getDate() == now.getDate() && date.getMonth() == now.getMonth() && date.getFullYear() == now.getFullYear()) days = 'Aujourd’hui'
+		else if(date.getDate() == now.getDate()-1 && date.getMonth() == now.getMonth() && date.getFullYear() == now.getFullYear()) days = 'Hier'
+		else days = (addZero(date.getDate())+
+		  "/"+addZero((date.getMonth()+1))+
+		  "/"+addZero(date.getFullYear()))
+		var formattedDate = (
+			days+" à "+addZero(date.getHours())+
+		  ":"+addZero(date.getMinutes())
+		 )
+		if(oldUser!=msg.author) avatarChange=1
+		oldUser = msg.author
+		messageContainer.innerHTML += createMessageObject(msg.author,msg.avatar,formattedDate,msg.id,linkify(msg.content),msg.messageId,!!avatarChange,bot)
+		avatarChange=0
+  })
+  	if(autoscroll.checked==false)
+		messageContainer.scrollTop -= messageContainer.children[messageContainer.children.length - 1].offsetHeight + 22
+
+});
+socket.on('wh', function(data) {
+	if(data.error) alert("Error:\n"+data.error.message)
+});
+
+function linkify(inputText) {
+    var replacedText, replacePattern1, replacePattern2, replacePattern3;
+    replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+    replacedText = inputText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
+    replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
+    replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
+    replacePattern3 = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
+    replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
+    return replacedText;
+}
+socket.emit('serverChannels',{id:serverIdValue})
+function createMessageObject(name,image,date,id,message,messageId,avatarWrapper,bot){
+	var avatarWrapperHTML = `
+		<h2 class="header-23xsNx" aria-describedby="reply-context-894947665257824319" aria-labelledby="message-username-894947665257824319 message-timestamp-894947665257824319">
+			<img src="${image}" aria-hidden="true" class="avatar-1BDn8e clickable-1bVtEA" alt=" " onclick="document.whForm.content.value+='<@${id}>'">
+			<span id="message-username-894947665257824319" class="headerText-3Uvj1Y"><span class="username-1A8OIy desaturateUserColors-1gar-1 clickable-1bVtEA" aria-controls="popout_623" aria-expanded="false" role="button" tabindex="0" style="color: white;">${name}</span></span>${bot}<span class="timestamp-3ZCmNB timestampInline-yHQ6fX"><time aria-label="Aujourd’hui à 16:02" id="message-timestamp-894947665257824319" datetime="2021-10-05T14:02:30.721Z"><i class="separator-2nZzUB" aria-hidden="true"> — </i><span style='color:gray;font-size:12px'>${date}</span></time></span>
+		</h2>
+	`
+	return `
+		<div class="contents-2mQqc9">
+			${avatarWrapper?avatarWrapperHTML:""}
+			<div id="${messageId}" class="markup-2BOw-j messageContent-2qWWxC">${message}</div>
+		</div>
+	`
+}
+</script>
 </html>

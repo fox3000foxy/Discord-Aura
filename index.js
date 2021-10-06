@@ -60,6 +60,19 @@ function sendChannelMessages(msg) {
 io.on('connection', (socket) => {
   // console.log('a user connected');
   socket.on('channelMessages', sendChannelMessages);
+	socket.on('server', (msgs)=>{
+		var serverObjectArray = []
+		msgs.forEach((msg)=>{
+			var server = client.guilds.cache.get(msg)
+			var serverObject = {
+				name: server.name,
+				iconUrl: server.iconURL(),
+				id: server.id
+			};
+			serverObjectArray.push(serverObject)
+		})
+		io.emit("server",serverObjectArray)
+	});
   socket.on('serverChannels', (msg) => {
 	var channelsToSend = []
 	if(client.guilds.cache.get(msg.id)==null) {
