@@ -238,7 +238,7 @@ socket.on('channelMessages', function(data) {
 	messageContainer.innerHTML = ''
 	data.messageArray.forEach(msg=>{
 		var assets = '',newMessage = '',edited = '', bot = ''
-		if(msg.attachment) assets = ' <a href="'+msg.attachment+'" target="_blank">Voir les pièeces jointes</a>'
+		if(msg.attachment) assets = ` <a href="${msg.attachment}" target="_blank">Voir les pièces jointes</a>`
 		if(msg.editedTimestamp!="0") edited = 'modified '
 		if(msg.bot==true) bot = '\t<img src="bot.png">'
 		var timestamp = msg.timestamp
@@ -255,7 +255,7 @@ socket.on('channelMessages', function(data) {
 		 )
 		if(oldUser!=msg.author) avatarChange=1
 		oldUser = msg.author
-		messageContainer.innerHTML += createMessageObject(msg.author,msg.avatar,formattedDate,msg.id,linkify(msg.content),msg.messageId,!!avatarChange,bot)
+		messageContainer.innerHTML += createMessageObject(msg.author,msg.avatar,formattedDate,msg.id,linkify(msg.content) + assets,msg.messageId,!!avatarChange,bot)
 		avatarChange=0
   })
   	if(autoscroll.checked==false)
