@@ -124,6 +124,7 @@ serverId.value = serverIdValue
 askForServerChannels(localStorage.getItem("serverId"),true)
 autoscroll = document.getElementById("autoscroll")
 avatarChange = 1
+serverAsked = 0
 autoscrollBool = true
 function autoScrollUpdate(){
 	if(messageContainer.scrollHeight - messageContainer.scrollTop == messageContainer.offsetHeight) 
@@ -131,8 +132,10 @@ function autoScrollUpdate(){
 }
 
 serverList = {}
+
 socket.emit("server",JSON.parse(localStorage.getItem("serverList")))
 socket.on("server",(servers)=>{
+	if(serverAsked==1) return
 	if(servers.length!=0) {
 		servers.forEach((server)=>{
 			console.log(server)
@@ -161,6 +164,7 @@ socket.on("server",(servers)=>{
 			location.reload()
 		" class="serverIcon" src="add.png">
 	`
+	serverAsked = 1
 })
 
 oldUser = null
