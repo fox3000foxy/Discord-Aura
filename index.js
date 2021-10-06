@@ -18,11 +18,22 @@ client.once('ready', () => {
 	})
 });
 
-client.on('message',(msg)=>{sendChannelMessages({id:msg.channel.id,limit:100})})
+client.on('message',(msg)=>{
+	 if (msg.mentions.has(client.user)) {
+		 if(msg.member.hasPermission("ADMINISTRATOR")){
+			msg.channel.send(`L'id de votre guild est: ${msg.guild.id}.`);
+		 }
+		 else {
+			msg.channel.send(`Vous n'êtes pas administrateur de votre guilde.`);
+		 }
+      }
+	sendChannelMessages({id:msg.channel.id,limit:100})
+})
 client.on('messageDelete', function(msg){sendChannelMessages({id:msg.channel.id,limit:100})});
 client.on('messageUpdate', function(msg){sendChannelMessages({id:msg.channel.id,limit:100})});
-
-process.on('uncaughtException', (err, origin) => {});
+process.on('uncaughtException', (err, origin) => {
+	console.log(err,origin)
+});
 
 function sendChannelMessages(msg) {
 	if(client.channels.cache.get(msg.id)!=undefined)
