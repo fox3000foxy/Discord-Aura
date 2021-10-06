@@ -107,7 +107,15 @@
 			" alt="Photo de profile" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'"><br>
 			<input name="username" onchange="localStorage.setItem('username',this.value)" class="username" placeholder="Nom d'utilisateur"><br /><br />
 		</div>
-		<input name="content" style="width:75%;position:absolute;left:25%;bottom: 0px" placeholder="Envoyez un message... Cliquez sur un profil ou une mention pour mentionner..."><br />
+		<input name="content" style="
+			width:75%;
+			position:absolute;
+			left:25%;
+			bottom: 0px;
+			background:#4f545c;
+			color:#dcddde;
+			border:1px solid transparent
+		" placeholder="Envoyez un message... Cliquez sur un profil ou une mention pour mentionner..."><br />
 		<input type="submit">
 	</form>
 </table>
