@@ -74,6 +74,16 @@
 			" type="number"><br>
 			<input type="checkbox" id="autoscroll" checked="true"> Autoscroll
 		</div>
+		<div id="serverName" style="
+			position:absolute;
+			left:64px;
+			top:0px;
+			width:calc(25% - 64px);
+			height:50px;
+			padding-top:15px
+		">
+		
+		</div>
 		<select id="channelNames" multiple onchange="
 			localStorage.setItem('selectedChannel',this.selectedIndex);
 			askChannels();
@@ -81,8 +91,8 @@
 			position:absolute;
 			left:64px;
 			width:calc(25% - 64px);
-			top:0;
-			height:calc( 85% + 43px );
+			top:50px;
+			height:calc( 85% + 43px - 50px);
 			background:#202225;
 			border-color:#202225;
 			color:white;
@@ -138,14 +148,16 @@ socket.on("server",(servers)=>{
 	if(serverAsked==1) return
 	if(servers.length!=0) {
 		servers.forEach((server)=>{
-			console.log(server)
+			<!-- console.log(server) -->
 			var alt = server.name.match(/\b(\w)/g).join('')
 			serverListElem.innerHTML += `
 				<img onclick="
 					serverId.value = '${server.id}'
 					localStorage.setItem('serverId',serverId.value);
+					localStorage.setItem('serverName','${server.name}');
 					changing = 1;
 					askForServerChannels(serverId.value);
+					document.getElementById('serverName').innerHTML = '<b>${server.name}</b>';
 				" class="serverIcon" ${server.iconUrl!=null?'src="'+server.iconUrl+'"':''} title="${alt}">
 			`
 			serverList[server.id] = server
@@ -165,6 +177,8 @@ socket.on("server",(servers)=>{
 		" class="serverIcon" src="add.png">
 	`
 	serverAsked = 1
+	if(localStorage.getItem("serverName"))
+		document.getElementById("serverName").innerHTML = '<b>'+localStorage.getItem("serverName")+'</b>';
 })
 
 oldUser = null
