@@ -13,10 +13,11 @@
 		this.content.value=""
 		return false
 		' method="GET" name="whForm">
-		<div id="messageContainer" style="border:1px solid white; text-align:left;height:50%;overflow-y:scroll;padding:10px; width:75%;background-color: #2f3136;display:block;   position: relative;margin-top:10px">
+		<div id="messageContainer" style="text-align:left;height:50%;overflow-y:scroll;padding:10px; width:75%;background-color: #2f3136;display:block; position: absolute;top:0;left:25%">
 			Messages loading... Please Wait
 		</div>
-		<input name="content" style="width:76.75%" placeholder="Envoyez un message..."><br />
+		<input name="content" style="width:75%;position:absolute;left:25%;top:calc( 50% + 20px )" placeholder="Envoyez un message..."><br />
+		<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 		<!-- Message: -->
 		<!-- <br /> -->
 		<br />
@@ -25,19 +26,30 @@
 			changing = 1;
 			askForServerChannels(this.value);
 		" type="number"><br>
-		Salon: 
 		<select id="channelNames" multiple onchange="
 			localStorage.setItem('selectedChannel',this.selectedIndex);
 			askChannels();
+		" style="
+			position:absolute;
+			left:10%;
+			width:15%;
+			top:0;
+			height:calc( 45% );
+			background:#202225;
+			color:white;
 		"></select><br /><br />
 		Lien de la photo de profile: <input name="avatar_url" onchange="localStorage.setItem('avatar_url',this.value);document.getElementById('image').src=this.value"><br />
-		Photo de profile:<br><img id="image" width="100px" height="100px" ondblclick="
-		linkOfPP = prompt('Lien de la photo de profile','')
-		if(linkOfPP != null)
-		document.whForm.avatar_url.value = linkOfPP
-		localStorage.setItem('avatar_url',document.whForm.avatar_url.value);document.getElementById('image').src=document.whForm.avatar_url.value
-		" alt="Photo de profile" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'"><br>
-		<input name="username" onchange="localStorage.setItem('username',this.value)" class="username" placeholder="Nom d'utilisateur"><br /><br />
+		<br>
+		<div style="position:absolute;left:10%;top:45%;background:#36393f;width:15%;height:calc(5% + 43px)">
+		<br>
+			<img id="image" width="32px" height="32px" onclick="
+			linkOfPP = prompt('Lien de la photo de profile','')
+			if(linkOfPP != null)
+			document.whForm.avatar_url.value = linkOfPP
+			localStorage.setItem('avatar_url',document.whForm.avatar_url.value);document.getElementById('image').src=document.whForm.avatar_url.value
+			" alt="Photo de profile" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'"><br>
+			<input name="username" onchange="localStorage.setItem('username',this.value)" class="username" placeholder="Nom d'utilisateur"><br /><br />
+		</div>
 		<span>Cliquez sur un profil ou une mention pour mentionner</span><br>
 		<input type="checkbox" id="autoscroll" checked="true"> Autoscroll
 		<br><br>
@@ -57,7 +69,6 @@ serverId = document.getElementById("serverId")
 askForServerChannels= function(serverId){socket.emit('serverChannels',{id:serverId})}
 askChannels = function (){socket.emit('channelMessages',{id:selectChannel.value,limit:100})}
 
-
 document.whForm.username.value = localStorage.getItem("username")
 document.whForm.avatar_url.value = localStorage.getItem("avatar_url")
 document.getElementById('image').src=localStorage.getItem("avatar_url")
@@ -70,9 +81,15 @@ setInterval(()=>{if(document.getElementById("autoscroll").checked==true) message
 socket.on('serverChannels', function(msg) {
 	if(msg.message || changing==0) return
 	changing = 0
+	category = []
 	if(msg.guildId==serverId.value) {
 		selectChannel.innerHTML = ''
 		msg.sortedArray.forEach(channel=>{
+			if(channel.name.indexOf(": ")!=-1) 
+			{ 
+				channel.name = channel.name.split(": ")[1]
+				//category[channel.name.split(": ")[0]][channel.name] = channel.id
+			}
 			selectChannel.innerHTML += '<option value="'+channel.id+'">'+channel.name+'</option>'
 		})
 		setTimeout(()=>{
@@ -84,7 +101,6 @@ socket.on('serverChannels', function(msg) {
 		},1000)
 	}
 });
-
 
 socket.on('channelMessages', function(data) {
 	avatarChange = 1
@@ -177,6 +193,9 @@ function createMessageObject(name,image,date,id,message,messageId,avatarWrapper,
 		margin-left:60px;
 	}
 	.header-23xsNx {margin-top:10px}
+	::-webkit-scrollbar {
+		display: none;
+	}
 </style>
 
 </html>

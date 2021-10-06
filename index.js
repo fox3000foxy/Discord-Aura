@@ -23,6 +23,7 @@ client.on('messageDelete', function(msg){sendChannelMessages({id:msg.channel.id,
 client.on('messageUpdate', function(msg){sendChannelMessages({id:msg.channel.id,limit:100})});
 
 function sendChannelMessages(msg) {
+	if(client.channels.cache.get(msg.id)!=undefined)
 	client.channels.cache.get(msg.id).messages.fetch({ limit: parseInt(msg.limit) })
 		.then(async msgs => {
 		  var fetchedArray = []
@@ -53,7 +54,7 @@ function sendChannelMessages(msg) {
 				 await io.emit('channelMessages',{messageArray:fetchedArray,channelId:msg.channel.id})
 			   } 
 		  })
-		});
+		}).catch((e)=>{});
   }
 
 io.on('connection', (socket) => {
