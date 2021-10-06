@@ -22,6 +22,8 @@ client.on('message',(msg)=>{sendChannelMessages({id:msg.channel.id,limit:100})})
 client.on('messageDelete', function(msg){sendChannelMessages({id:msg.channel.id,limit:100})});
 client.on('messageUpdate', function(msg){sendChannelMessages({id:msg.channel.id,limit:100})});
 
+process.on('uncaughtException', (err, origin) => {});
+
 function sendChannelMessages(msg) {
 	if(client.channels.cache.get(msg.id)!=undefined)
 	client.channels.cache.get(msg.id).messages.fetch({ limit: parseInt(msg.limit) })
