@@ -307,7 +307,7 @@ socket.on('channelMessages', function(data) {
 		)	
 		{
 			var link = assets.split('href="')[1].split('"')[0]
-			assets = '<img src="'+link+'" class="imageAsset">'
+			assets = '<br><img src="'+link+'" class="imageAsset">'
 		}
 		if(msg.editedTimestamp!="0") edited = 'modified '
 		if(msg.bot==true) bot = '\t<img src="bot.png">'
@@ -347,7 +347,9 @@ function linkify(inputText) {
 			replacedText.indexOf(".jpeg")!=-1 ||
 			replacedText.indexOf(".gif")!=-1 ||
 			replacedText.indexOf(".bmp")!=-1
-		)
+		) ||
+		replacedText.indexOf("tenor.com")!=-1
+		replacedText.indexOf("giphy.com")!=-1
 	)
 	{
 		var link = replacedText.split('href="')[1].split('"')[0]
