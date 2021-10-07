@@ -294,6 +294,9 @@ socket.on('channelMessages', function(data) {
 		var message = msg.content
 			.replaceAll("<","&lt")
 			.replaceAll(">","&gt")
+			.replaceAll("&ltmention","<mention")
+			.replaceAll("mentionend&gt",">")
+			.replaceAll("&lt/mention&gt","</mention>")
 		var assets = '',newMessage = '',edited = '', bot = ''
 		if(msg.attachment) assets = ` <a href="${msg.attachment}" target="_blank">Voir les pièces jointes</a>`
 		if(
