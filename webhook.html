@@ -100,8 +100,8 @@
 <div align="center">
 	<table>
 		<form onsubmit='
-		if(document.whForm.content.value==""){event.preventDefault()};
-		else socket.emit("wh",{
+		event.preventDefault();
+		if (document.whForm.content.value!="") socket.emit("wh",{
 			username: document.whForm.username.value,
 			avatar: document.whForm.avatar_url.value,
 			content: document.whForm.content.value,
