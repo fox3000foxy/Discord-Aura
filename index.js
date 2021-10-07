@@ -159,7 +159,7 @@ io.on('connection', (socket) => {
 	const webhook = webhooks.first();
 	await webhook.send({
 		content: msg.content,
-		username: msg.username,
+		username: msg.username==''?msg.username:'Aura User',
 		avatarURL: msg.avatar
 	}).then(()=>{
 		io.emit('wh',{message:'sended hook !'})
