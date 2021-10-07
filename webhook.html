@@ -101,7 +101,7 @@
 	<table>
 		<form onsubmit='
 		event.preventDefault();
-		if (document.whForm.content.value!="") socket.emit("wh",{
+		if (document.whForm.content.value.split(" ").join("")!="") socket.emit("wh",{
 			username: document.whForm.username.value,
 			avatar: document.whForm.avatar_url.value,
 			content: document.whForm.content.value,
