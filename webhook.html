@@ -70,6 +70,31 @@
 		max-height:75%;
 		border-radius:4px
 	}
+	/*RoxCSS*/
+	input{
+		 background-color: var(--input-background);
+		 border-radius: var(--input-radius);
+		 border: 1px solid rgba(0, 0, 0, 0.3);
+		 color: var(--input-color);
+		 display: block;
+		 font-size: var(--input-font-size);
+		 font-weight: var(--input-font-weight);
+		 margin: 0;
+		 outline-style: none;
+		 padding: var(--input-padding);
+		 width: calc(100% - var(--input-padding) * 2);
+		 max-width: 100%;
+		 transition: border-color 0.2s ease-in-out;
+		 font-family: sans-serif;
+	}
+	:root {
+		 --input-radius: 3px;
+		 --input-background: rgba(0, 0, 0, 0.1);
+		 --input-color: var(--text-default);
+		 --input-font-size: 16px;
+		 --input-font-weight: 400;
+		 --input-padding: 10px;
+	}
 </style>
 <div align="center">
 	<table>
@@ -85,12 +110,12 @@
 		return false
 		' method="GET" name="whForm">
 		<div id="serverList" style="position:absolute;left:0;top:0;background:#2f3136;width:64px;height:100%"></div>
-		<div id="messageContainer" onscroll="autoScrollUpdate()" style="text-align:left;height:calc(100% - 43px);overflow-y:scroll;padding:10px; width:75%;background-color: #2f3136;display:block; position: absolute;top:0;left:25%">
+		<div id="messageContainer" onscroll="autoScrollUpdate()" style="text-align:left;height:calc(100% - 60px);overflow-y:scroll;padding:10px; width:75%;background-color: #2f3136;display:block; position: absolute;top:0;left:25%">
 			Messages loading... Please wait...
 		</div>
 		<div style="position:absolute;top:-1000px">
-			Lien de la photo de profile: <input name="avatar_url" onchange="localStorage.setItem('avatar_url',this.value);document.getElementById('image').src=this.value"><br />
-			Id du serveur: <input id="serverId" onchange="
+			<input name="avatar_url" onchange="localStorage.setItem('avatar_url',this.value);document.getElementById('image').src=this.value"><br />
+			<input id="serverId" onchange="
 				localStorage.setItem('serverId',this.value);
 				changing = 1;
 				askForServerChannels(this.value);
@@ -128,7 +153,7 @@
 			document.whForm.avatar_url.value = linkOfPP
 			localStorage.setItem('avatar_url',document.whForm.avatar_url.value);document.getElementById('image').src=document.whForm.avatar_url.value
 			" alt="Photo de profile" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'" style="border-radius:32px"><br>
-			<input name="username" onchange="localStorage.setItem('username',this.value)" class="username" placeholder="Nom d'utilisateur"><br /><br />
+			<input name="username" style="width:100%" onchange="localStorage.setItem('username',this.value)" class="username" placeholder="Nom d'utilisateur"><br /><br />
 		</div>
 		<input name="content" style="
 			width:75%;
