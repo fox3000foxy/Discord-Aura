@@ -65,6 +65,11 @@
 	option {
 		padding-left:24px;
 	}
+	.imageAsset{
+		max-width:75%;
+		max-height:75%;
+		border-radius:4px
+	}
 </style>
 <div align="center">
 	<table>
@@ -259,6 +264,19 @@ socket.on('channelMessages', function(data) {
 	data.messageArray.forEach(msg=>{
 		var assets = '',newMessage = '',edited = '', bot = ''
 		if(msg.attachment) assets = ` <a href="${msg.attachment}" target="_blank">Voir les pièces jointes</a>`
+		if(
+			assets.indexOf("href")!=-1 && (
+				assets.indexOf(".png")!=-1 ||
+				assets.indexOf(".jpg")!=-1 ||
+				assets.indexOf(".jpeg")!=-1 ||
+				assets.indexOf(".gif")!=-1 ||
+				assets.indexOf(".bmp")!=-1
+			)
+		)	
+		{
+			var link = assets.split('href="')[1].split('"')[0]
+			assets = '<img src="'+link+'" class="imageAsset">'
+		}
 		if(msg.editedTimestamp!="0") edited = 'modified '
 		if(msg.bot==true) bot = '\t<img src="bot.png">'
 		var timestamp = msg.timestamp
@@ -290,10 +308,25 @@ function linkify(inputText) {
     var replacedText, replacePattern1, replacePattern2, replacePattern3;
     replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
     replacedText = inputText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
-    replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
-    replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
-    replacePattern3 = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
-    replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
+	if(
+		replacedText.indexOf("href")!=-1 && (
+			replacedText.indexOf(".png")!=-1 ||
+			replacedText.indexOf(".jpg")!=-1 ||
+			replacedText.indexOf(".jpeg")!=-1 ||
+			replacedText.indexOf(".gif")!=-1 ||
+			replacedText.indexOf(".bmp")!=-1
+		)
+	)
+	{
+		var link = replacedText.split('href="')[1].split('"')[0]
+		replacedText += '<br><img src="'+link+'" class="imageAsset">'
+		if(inputText == link)
+			replacedText = '<img src="'+link+'" class="imageAsset">'
+		else
+			replacedText += '<br><img src="'+link+'" class="imageAsset">'
+	}
+    //replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
+    //replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
     return replacedText;
 }
 socket.emit('serverChannels',{id:serverIdValue})
