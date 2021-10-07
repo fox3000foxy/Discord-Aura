@@ -174,14 +174,16 @@ socket.on("server",(servers)=>{
 	serverListElem.innerHTML += `
 		<img onclick="
 			result = prompt('Type your server ID','');
-			serverId.value = parseInt(result);
-			askForServerChannels(serverId.value);
-			localStorage.setItem('serverId',parseInt(result));
-			serverListJSON = JSON.parse(localStorage.getItem('serverList'))
-			if(serverListJSON.indexOf(result)==-1)
-				serverListJSON.push(result)
-			localStorage.setItem('serverList',JSON.stringify(serverListJSON))
-			location.reload()
+			if(result != null && result !=''){
+				serverId.value = parseInt(result);
+				askForServerChannels(serverId.value);
+				localStorage.setItem('serverId',parseInt(result));
+				serverListJSON = JSON.parse(localStorage.getItem('serverList'))
+				if(serverListJSON.indexOf(result)==-1)
+					serverListJSON.push(result)
+				localStorage.setItem('serverList',JSON.stringify(serverListJSON))
+				location.reload()
+			}
 		" class="serverIcon" src="add.png">
 	`
 	serverAsked = 1
@@ -255,7 +257,7 @@ socket.on('channelMessages', function(data) {
 		 )
 		if(oldUser!=msg.author) avatarChange=1
 		oldUser = msg.author
-		messageContainer.innerHTML += createMessageObject(msg.author,msg.avatar,formattedDate,msg.id,linkify(msg.content) + assets,msg.messageId,!!avatarChange,bot)
+		messageContainer.innerHTML += createMessageObject(msg.author,msg.avatar,formattedDate,msg.id,linkify(msg.content) + assets,msg.messageId,!!avatarChange,bot,edited)
 		avatarChange=0
   })
   	if(autoscroll.checked==false)
@@ -277,7 +279,7 @@ function linkify(inputText) {
     return replacedText;
 }
 socket.emit('serverChannels',{id:serverIdValue})
-function createMessageObject(name,image,date,id,message,messageId,avatarWrapper,bot){
+function createMessageObject(name,image,date,id,message,messageId,avatarWrapper,bot,edited){
 	var avatarWrapperHTML = `
 		<h2 class="header-23xsNx" aria-describedby="reply-context-894947665257824319" aria-labelledby="message-username-894947665257824319 message-timestamp-894947665257824319">
 			<img src="${image}" aria-hidden="true" class="avatar-1BDn8e clickable-1bVtEA" alt=" " onclick="document.whForm.content.value+='<@${id}>'">
@@ -287,7 +289,7 @@ function createMessageObject(name,image,date,id,message,messageId,avatarWrapper,
 	return `
 		<div class="contents-2mQqc9">
 			${avatarWrapper?avatarWrapperHTML:""}
-			<div id="${messageId}" class="markup-2BOw-j messageContent-2qWWxC">${message}</div>
+			<div id="${messageId}" class="markup-2BOw-j messageContent-2qWWxC ${edited}">${message}</div>
 		</div>
 	`
 }
