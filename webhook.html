@@ -1,5 +1,6 @@
 <html class="theme-dark">
 <title>Aura UI</title>
+<link rel="stylesheet" href="buttons.css">
 <link rel="stylesheet" href="style.css">
 <style type="text/css">
 	body {
@@ -167,8 +168,10 @@
 		<input type="submit">
 	</form>
 </table>
+<div class="layerContainer-yqaFcK" id="promptBox" style="display:none"></div>
 </div>
 <script src="/socket.io/socket.io.js"></script>
+<script src="/prompt.js"></script>
 <script>
 var socket = io();
 if(localStorage.serverList == undefined)
@@ -221,17 +224,18 @@ socket.on("server",(servers)=>{
 	}
 	serverListElem.innerHTML += `
 		<img onclick="
-			result = prompt('Type your server ID','');
-			if(result != null && result !=''){
-				serverId.value = parseInt(result);
-				askForServerChannels(serverId.value);
-				localStorage.setItem('serverId',parseInt(result));
-				serverListJSON = JSON.parse(localStorage.getItem('serverList'))
-				if(serverListJSON.indexOf(result)==-1)
-					serverListJSON.push(result)
-				localStorage.setItem('serverList',JSON.stringify(serverListJSON))
-				location.reload()
-			}
+			promptBox('Add a Server','Type a server ID','Server ID','Confirm','Cancel',(result)=>{
+				if(result != null && result !=''){
+					serverId.value = parseInt(result);
+					askForServerChannels(serverId.value);
+					localStorage.setItem('serverId',parseInt(result));
+					serverListJSON = JSON.parse(localStorage.getItem('serverList'))
+					if(serverListJSON.indexOf(result)==-1)
+						serverListJSON.push(result)
+					localStorage.setItem('serverList',JSON.stringify(serverListJSON))
+					location.reload()
+				}
+			})
 		" class="serverIcon" src="add.png">
 	`
 	serverAsked = 1

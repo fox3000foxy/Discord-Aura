@@ -61,9 +61,9 @@ Vous pouvez aussi rajouter un \\🚫 dans le nom, la catégorie ou la descriptio
 })
 client.on('messageDelete', function(msg){sendChannelMessages({id:msg.channel.id,limit:100})});
 client.on('messageUpdate', function(msg){sendChannelMessages({id:msg.channel.id,limit:100})});
-// process.on('uncaughtException', (err, origin) => {
-	// console.log(err,origin)
-// });
+process.on('uncaughtException', (err, origin) => {
+	console.log(err,origin)
+});
 
 function sendChannelMessages(msg) {
 	if(client.channels.cache.get(msg.id)!=undefined)
