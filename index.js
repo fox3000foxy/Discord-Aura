@@ -160,7 +160,7 @@ io.on('connection', (socket) => {
 	await webhook.send({
 		content: msg.content,
 		username: msg.username || 'Aura User',
-		avatarURL: msg.avatar
+		avatarURL: msg.avatar || 'https://cdn.dribbble.com/users/6177725/screenshots/14442988/blue_happy.png'
 	}).then(()=>{
 		io.emit('wh',{message:'sended hook !'})
 	}).catch(e=>{
