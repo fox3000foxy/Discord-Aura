@@ -10,7 +10,6 @@ const port = process.env.PORT || 3000
 const { Server } = require("socket.io");
 const io = new Server(server);
 app.use(cors())
-
 client.once('ready', () => {
 	console.log('Ready!');
 	server.listen(port, () => {
@@ -65,6 +64,15 @@ process.on('uncaughtException', (err, origin) => {
 	console.log(err,origin)
 });
 
+function toTitleCase(str) {
+  return str.replace(
+    /\w\S*/g,
+    function(txt) {
+      return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+    }
+  );
+}
+
 function sendChannelMessages(msg) {
 	if(client.channels.cache.get(msg.id)!=undefined)
 	client.channels.cache.get(msg.id).messages.fetch({ limit: parseInt(msg.limit) })
@@ -72,9 +80,11 @@ function sendChannelMessages(msg) {
 		  var fetchedArray = []
 		  msgList = [...msgs].reverse()
 		  msgList.forEach(async (msgElem,i)=>{
-			  var msg = msgElem[1]
+					var msg = msgElem[1]
+					var color = "#ffffff"
+					var name = msg.author.username
 				  if(msg.attachments.first() != undefined) var attachment = msg.attachments.first().url
-				  formattedMsg = msg.content
+				  var formattedMsg = msg.content
 				  arrayOfMentions = [...msg.mentions.users]
 				  arrayOfMentions.forEach((user,i)=>{
 					  if(formattedMsg.split("<@!"+user[0]+">").length>0)
@@ -82,8 +92,20 @@ function sendChannelMessages(msg) {
 					  if(formattedMsg.split("<@"+user[0]+">").length>0)
 					  formattedMsg = formattedMsg.split("<@"+user[0]+">").join(`<mention onclick="document.whForm.content.value += '${"<@!"+user[0]+">"}'">@${msg.mentions.users.get(user[0]).username}</mention>`)
 				  })
+				  await msg.guild.members.fetch()
+				  .then(r=>{
+					  membersArray = [...r]
+					  membersArray.forEach((member)=>{
+						  if(member[1].user.id == msg.author.id){
+							color = member[1].displayHexColor
+							if(member[1].nickname != null)
+							name = member[1].nickname
+						  }
+					  })
+				  })
+				  .catch(console.error);
 				  await fetchedArray.push({		  
-					  author:msg.author.username,
+					  author:name,
 					  timestamp: msg.createdTimestamp,
 					  avatar:msg.author.displayAvatarURL(),
 					  id : msg.author.id,
@@ -91,6 +113,7 @@ function sendChannelMessages(msg) {
 					  bot: (msg.author.bot && msg.webhookID==null),
 					  attachment: attachment || '',
 					  content: formattedMsg,
+					  color:color,
 					  editedTimestamp: msg.editedTimestamp,
 				   })
 			   if(i==msgList.length-1){
@@ -166,6 +189,51 @@ io.on('connection', (socket) => {
 	}).catch(e=>{
 		io.emit('wh',{error : e})
 	});
+  });
+  socket.on('memberList', async (msg) => {
+	  var memberListArray = []
+	  guildList = [...client.guilds.cache]
+	  await guildList.forEach(async (guild)=>{
+		  // console.log(msg.id)
+		  if(guild[0]==msg.id)
+			  await guild[1].members.fetch()
+			  .then(r=>{
+				  membersArray = [...r]
+				  membersArray.forEach((member)=>{
+					  var member = member[1]
+					  var activities = member.presence.activities
+					  var activity;
+					  if(activities.length!=0){
+						  activity = activities[0]
+						  var type = "";
+						  var name;
+						  // console.log(activity)
+						  if(activity.type!='CUSTOM_STATUS') {
+							type = "<b>"+toTitleCase(activity.type.split("ING")[0]) + "</b> "
+							name = activity.name
+						  }
+						  else {
+							  name = activity.state
+						  }
+					  }
+					memberListArray.push({
+						username: member.user.username,
+						id: member.user.id,
+						avatarURL: member.user.displayAvatarURL(),
+						status:member.presence.status,
+						activity: type+name || null,
+						color: member.displayHexColor,
+						role: member.roles.cache.first().name,
+					})
+				  })
+			  })
+			  .catch(console.error);
+	  })
+	  io.emit("memberList",memberListArray.sort(function(a, b){
+		if(a.username < b.username) { return -1}
+		if(a.username > b.username) { return 1 }
+		return 0
+	}))
   });
   socket.on('disconnect', () => {});
 });

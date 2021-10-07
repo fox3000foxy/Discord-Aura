@@ -1,0 +1,93 @@
+body {
+	color: white;
+	background-color: #101010;
+	font-size:1em;
+}
+select{
+	padding-top:8px;
+	padding-bottom:8px;
+}
+mention {
+	background:hsla(235,calc(var(--saturation-factor, 1)*85.6%),64.7%,0.3);
+	border-radius: 3px;
+	padding: 0 2px;
+}
+a {
+	color:hsl(197,calc(var(--saturation-factor, 1)*100%),47.8%);
+}
+.modified::after {
+	content:"(modifié)";
+	color: gray;
+	font-size:0.65em;
+	margin-left: 5px;
+}
+option::before {
+	content:"# ";
+	color: gray;
+	margin-right: 3.5px;
+	font-size:1.25em;
+}
+/*
+optgroup::before {
+	content:"v";
+	color: gray;
+	margin-right: 0px;
+	font-size:1em;
+}
+*/
+optgroup {
+	padding-top:5px;
+	padding-bottom:5px;
+}
+.hidden {position:absolute;top:-1000px}
+.username{background:none;border:none;color:white;text-align:center}
+.messageContent-2qWWxC {
+	position:relative;
+	left:64px
+}
+.username-1A8OIy {
+	margin-left:60px;
+}
+.header-23xsNx {margin-top:10px}
+::-webkit-scrollbar {
+	display: none;
+}
+.serverIcon {
+	margin-top:16px;
+	width: 48px;
+	height: 48px;
+	border-radius: 24px;
+}
+option {
+	padding-left:24px;
+}
+.imageAsset{
+	max-width:75%;
+	max-height:75%;
+	border-radius:4px
+}
+/*RoxCSS*/
+input{
+	 background-color: var(--input-background);
+	 border-radius: var(--input-radius);
+	 border: 1px solid rgba(0, 0, 0, 0.3);
+	 color: var(--input-color);
+	 display: block;
+	 font-size: var(--input-font-size);
+	 font-weight: var(--input-font-weight);
+	 margin: 0;
+	 outline-style: none;
+	 padding: var(--input-padding);
+	 width: calc(100% - var(--input-padding) * 2);
+	 max-width: 100%;
+	 transition: border-color 0.2s ease-in-out;
+	 font-family: sans-serif;
+}
+:root {
+	 --input-radius: 3px;
+	 --input-background: rgba(0, 0, 0, 0.1);
+	 --input-color: var(--text-default);
+	 --input-font-size: 16px;
+	 --input-font-weight: 400;
+	 --input-padding: 10px;
+}
