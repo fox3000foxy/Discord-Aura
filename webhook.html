@@ -213,10 +213,10 @@ socket.on("server",(servers)=>{
 				<img onclick="
 					serverId.value = '${server.id}'
 					localStorage.setItem('serverId',serverId.value);
-					localStorage.setItem('serverName','${server.name}');
+					localStorage.setItem('serverName',unescape('${server.name.replaceAll("'","%27")}'));
 					changing = 1;
 					askForServerChannels(serverId.value);
-					document.getElementById('serverName').innerHTML = '<b>${server.name}</b>';
+					document.getElementById('serverName').innerHTML = '<b>${server.name.replaceAll("'","&amp;#39;")}</b>';
 				" class="serverIcon" ${server.iconUrl!=null?'src="'+server.iconUrl+'"':''} title="${alt}">
 			`
 			serverList[server.id] = server
@@ -350,9 +350,7 @@ function linkify(inputText) {
 			replacedText.indexOf(".jpeg")!=-1 ||
 			replacedText.indexOf(".gif")!=-1 ||
 			replacedText.indexOf(".bmp")!=-1
-		) ||
-		replacedText.indexOf("tenor.com")!=-1 ||
-		replacedText.indexOf("giphy.com")!=-1
+		)
 	)
 	{
 		var link = replacedText.split('href="')[1].split('"')[0]
