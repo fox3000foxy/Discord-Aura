@@ -202,10 +202,8 @@ socket.on('wh', function(data) {
 
 function linkify(inputText) {
     var replacedText, replacePattern1, replacePattern2, replacePattern3;
-    replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
-    replacePattern2 = /(\b(https2|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+    replacePattern1 = /(\b(http?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
     replacedText = inputText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
-    replacedText = inputText.replace(replacePattern2, '<a href="$1" target="_blank">$1</a>');
 	if(
 		replacedText.indexOf("href")!=-1 && (
 			replacedText.indexOf(".png")!=-1 ||
@@ -293,22 +291,10 @@ function Slimdown() {
   // Rules
   this.rules =  [
     {regex: /(#+)(.*)/g, replacement: header},                                         // headers
-    {regex: /!\[([^\[]+)\]\(([^\)]+)\)/g, replacement: '<img src=\'$2\' alt=\'$1\'>'}, // image
-    {regex: /\[([^\[]+)\]\(([^\)]+)\)/g, replacement: '<a href=\'$2\'>$1</a>'},        // hyperlink
     {regex: /(\*\*)(.*?)\1/g, replacement: '<strong>$2</strong>'},                  // bold
-    {regex: /(__)(.*?)\1/g, replacement: '<u>$2</u>'},                  // bold
-    {regex: /(\*|_)(.*?)\1/g, replacement: '<em>$2</em>'},                             // emphasis
+    {regex: /(__)(.*?)\1/g, replacement: '<u>$2</u>'},                  				// bold
     {regex: /\~\~(.*?)\~\~/g, replacement: '<del>$1</del>'},                           // del
-    {regex: /\:\"(.*?)\"\:/g, replacement: '<q>$1</q>'},                               // quote
     {regex: /`(.*?)`/g, replacement: '<code>$1</code>'},                               // inline code
-    {regex: /\n\*(.*)/g, replacement: ulList},                                         // ul lists
-    {regex: /\n[0-9]+\.(.*)/g, replacement: olList},                                   // ol lists
-    {regex: /\n(&gt;|\>)(.*)/g, replacement: blockquote},                              // blockquotes
-    {regex: /\n-{5,}/g, replacement: '\n<hr />'},                                      // horizontal rule
-    {regex: /\n([^\n]+)\n/g, replacement: para},                                       // add paragraphs
-    {regex: /<\/ul>\s?<ul>/g, replacement: ''},                                        // fix extra ul
-    {regex: /<\/ol>\s?<ol>/g, replacement: ''},                                        // fix extra ol
-    {regex: /<\/blockquote><blockquote>/g, replacement: '\n'}                          // fix extra blockquote
   ];
 
   // Add a rule.
