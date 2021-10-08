@@ -216,7 +216,10 @@ function linkify(inputText) {
 	)
 	{
 		var link = replacedText.split('href="')[1].split('"')[0]
-		replacedText += '<br><img src="'+link+'" class="imageAsset">'
+		if(link==inputText)
+			replacedText = '<img src="'+link+'" class="imageAsset">'
+		else
+			replacedText += '<br><img src="'+link+'" class="imageAsset">'
 	}
     //replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
     //replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
