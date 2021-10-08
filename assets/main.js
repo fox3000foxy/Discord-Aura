@@ -30,6 +30,7 @@ serverList = {}
 socket.emit("server",JSON.parse(localStorage.getItem("serverList")))
 socket.on("server",(servers)=>{
 	if(serverAsked==1) return
+	serverListElem.innerHTML = ""
 	if(servers.length!=0) {
 		servers.forEach((server)=>{
 			<!-- console.log(server) -->
@@ -52,14 +53,12 @@ socket.on("server",(servers)=>{
 		<img onclick="
 			promptBox('Add a Server','Type a server ID','Server ID','Confirm','Cancel',(result)=>{
 				if(result != null && result !=''){
-					serverId.value = parseInt(result);
-					askForServerChannels(serverId.value);
-					localStorage.setItem('serverId',parseInt(result));
 					serverListJSON = JSON.parse(localStorage.getItem('serverList'))
 					if(serverListJSON.indexOf(result)==-1)
 						serverListJSON.push(result)
 					localStorage.setItem('serverList',JSON.stringify(serverListJSON))
-					location.reload()
+					serverAsked=0;
+					socket.emit('server',JSON.parse(localStorage.getItem('serverList')))
 				}
 			})
 		" class="serverIcon" src="add.png">
@@ -233,7 +232,74 @@ function createMessageObject(name,image,color,date,id,message,messageId=null,ava
 				  text-overflow: ellipsis;
 				  width: ${status==null?'80':'60'}%;
 				  padding-left: ${status==null?'8':'16'}px
-				">${message}</div>
+				">${sd.render(message)}</div>
 		</div>
 	`
 }
+
+function Slimdown() {
+
+  // Rules
+  this.rules =  [
+    {regex: /(#+)(.*)/g, replacement: header},                                         // headers
+    {regex: /!\[([^\[]+)\]\(([^\)]+)\)/g, replacement: '<img src=\'$2\' alt=\'$1\'>'}, // image
+    {regex: /\[([^\[]+)\]\(([^\)]+)\)/g, replacement: '<a href=\'$2\'>$1</a>'},        // hyperlink
+    {regex: /(\*\*)(.*?)\1/g, replacement: '<strong>$2</strong>'},                  // bold
+    {regex: /(__)(.*?)\1/g, replacement: '<u>$2</u>'},                  // bold
+    {regex: /(\*|_)(.*?)\1/g, replacement: '<em>$2</em>'},                             // emphasis
+    {regex: /\~\~(.*?)\~\~/g, replacement: '<del>$1</del>'},                           // del
+    {regex: /\:\"(.*?)\"\:/g, replacement: '<q>$1</q>'},                               // quote
+    {regex: /`(.*?)`/g, replacement: '<code>$1</code>'},                               // inline code
+    {regex: /\n\*(.*)/g, replacement: ulList},                                         // ul lists
+    {regex: /\n[0-9]+\.(.*)/g, replacement: olList},                                   // ol lists
+    {regex: /\n(&gt;|\>)(.*)/g, replacement: blockquote},                              // blockquotes
+    {regex: /\n-{5,}/g, replacement: '\n<hr />'},                                      // horizontal rule
+    {regex: /\n([^\n]+)\n/g, replacement: para},                                       // add paragraphs
+    {regex: /<\/ul>\s?<ul>/g, replacement: ''},                                        // fix extra ul
+    {regex: /<\/ol>\s?<ol>/g, replacement: ''},                                        // fix extra ol
+    {regex: /<\/blockquote><blockquote>/g, replacement: '\n'}                          // fix extra blockquote
+  ];
+
+  // Add a rule.
+  this.addRule = function (regex, replacement) {
+    regex.global = true;
+    regex.multiline = false;
+    this.rules.push({regex: regex, replacement: replacement});
+  };
+
+  // Render some Markdown into HTML.
+  this.render = function (text) {
+    this.rules.forEach(function (rule) {
+      text = text.replace(rule.regex, rule.replacement);
+    });
+    return text.trim();
+  };
+
+  function para (text, line) {
+    debugger;
+    var trimmed = line.trim();
+    if (/^<\/?(ul|ol|li|h|p|bl)/i.test(trimmed)) {
+      return '\n' + line + '\n';
+    }
+    return '\n<p>' + trimmed + '</p>\n';
+  }
+
+  function ulList (text, item) {
+    return '\n<ul>\n\t<li>' + item.trim() + '</li>\n</ul>';
+  }
+
+  function olList (text, item) {
+    return '\n<ol>\n\t<li>' + item.trim() + '</li>\n</ol>';
+  }
+
+  function blockquote (text, tmp, item) {
+    return '\n<blockquote>' + item.trim() + '</blockquote>';
+  }
+
+  function header (text, chars, content) {
+    var level = chars.length;
+    return '<h' + level + '>' + content.trim() + '</h' + level + '>';
+  }
+}
+
+var sd = new Slimdown();
