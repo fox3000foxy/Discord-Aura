@@ -19,6 +19,7 @@ client.once('ready', () => {
 //Vous voulez savoir votre rang, faire une commande d'un bot, c'est ici :)
 //Merci de ne pas taper la discut ici :smile: !
 client.on('message',(msg)=>{
+		ct=0
 	 if (msg.mentions.has(client.user)) {
 		 if(msg.member.hasPermission("ADMINISTRATOR")){
 			// console.log(msg.channel.topic)
@@ -73,8 +74,15 @@ function toTitleCase(str) {
   );
 }
 
-function sendChannelMessages(msg) {
-	if(client.channels.cache.get(msg.id)!=undefined)
+async function sendChannelMessages(msg) {
+	// if(client.channels.cache.get(msg.id)!=undefined)
+	var guilds = client.guilds.cache.map(g => g.id)
+	var guildsInvites = []
+	await guilds.forEach(async (id)=>{
+		guild = client.guilds.cache.get(id)
+		guild.fetchInvites().then((result)=>{guildsInvites.push(result)})
+	})
+	var inviteGuild = client.channels.cache.get(msg.id).guild.fetchInvites()
 	client.channels.cache.get(msg.id).messages.fetch({ limit: parseInt(msg.limit) })
 		.then(async msgs => {
 		  var fetchedArray = []
@@ -104,6 +112,20 @@ function sendChannelMessages(msg) {
 					  })
 				  })
 				  .catch(console.error);
+				  var inviteLink ;
+				  if(formattedMsg.indexOf("https://discord.gg/")!=-1){inviteLink = {name: "Serveur inconnu",iconUrl: "unknown.png",id:null,state: false}}
+					guildsInvites.forEach((invites)=>{
+							invites.forEach((invite)=>{
+								if(formattedMsg.indexOf("https://discord.gg/"+invite.code)!=-1){
+									inviteLink = {
+										name: invite.guild.name,
+										iconUrl: invite.guild.iconURL(),
+										id:invite.guild.id,
+										state: true
+									}
+								}
+							})
+					})
 				  await fetchedArray.push({		  
 					  author:name,
 					  timestamp: msg.createdTimestamp,
@@ -115,6 +137,7 @@ function sendChannelMessages(msg) {
 					  content: formattedMsg,
 					  color:color,
 					  editedTimestamp: msg.editedTimestamp,
+					  invite:inviteLink
 				   })
 			   if(i==msgList.length-1){
 				 await io.emit('channelMessages',{messageArray:fetchedArray,channelId:msg.channel.id})
@@ -229,11 +252,11 @@ io.on('connection', (socket) => {
 			  })
 			  .catch(console.error);
 	  })
-	  io.emit("memberList",memberListArray.sort(function(a, b){
+	  io.emit("memberList",{id:msg.id,membersArray:memberListArray.sort(function(a, b){
 		if(a.username < b.username) { return -1}
 		if(a.username > b.username) { return 1 }
 		return 0
-	}))
+	})})
   });
   socket.on('disconnect', () => {});
 });

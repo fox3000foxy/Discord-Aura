@@ -78,8 +78,9 @@ function statusColor(status){
 function askMemberList(){
 	socket.emit("memberList",{id:serverId.value})
 	socket.on("memberList",(members)=>{
+		if(members.id == serverId.value)
 		document.getElementById("serverMembers").innerHTML = ""
-		members.forEach((member)=>{
+		members.membersArray.forEach((member)=>{
 			document.getElementById("serverMembers").innerHTML += createMessageObject(member.username,member.avatarURL,member.color,'',member.id,member.activity||'<br>',null,true,'','',statusColor(member.status))
 			// `
 				// <div>
@@ -128,9 +129,6 @@ setInterval(()=>{
 		messageContainer.scrollTop = 100000
 })
 
-setInterval(()=>{
-  	askMemberList()
-},20000)
 askMemberList()
 
 function addZero(number){
@@ -145,12 +143,20 @@ socket.on('channelMessages', function(data) {
 	) return
 	messageContainer.innerHTML = ''
 	data.messageArray.forEach(msg=>{
+		// console.log(msg.invite)
 		var message = msg.content
 			.replaceAll("<","&lt")
 			.replaceAll(">","&gt")
 			.replaceAll("&ltmention","<mention")
 			.replaceAll("&gt@",">@")
 			.replaceAll("&lt/mention&gt","</mention>")
+		message = sd.render(message)
+		for (i=0;i<Object.keys(listOfEmoji).length;i++)
+		{
+			key = Object.keys(listOfEmoji)[i]
+			if(message.indexOf(":"+key+":")!=-1)
+				message = message.split(":"+key+":").join("<span style='font-size:18px'>&#x"+listOfEmoji[key].split("U+")[1]+";</span>")
+		}
 		var assets = '',newMessage = '',edited = '', bot = ''
 		if(msg.attachment) assets = ` <a href="${msg.attachment}" target="_blank">Voir les pièces jointes</a>`
 		if(
@@ -182,7 +188,7 @@ socket.on('channelMessages', function(data) {
 		 )
 		if(oldUser!=msg.author) avatarChange=1
 		oldUser = msg.author
-		messageContainer.innerHTML += createMessageObject(msg.author,msg.avatar,msg.color,formattedDate,msg.id,linkify(message) + assets,msg.messageId,!!avatarChange,bot,edited)
+		messageContainer.innerHTML += createMessageObject(msg.author,msg.avatar,msg.color,formattedDate,msg.id,linkify(message) + assets,msg.messageId,!!avatarChange,bot,edited,null,msg.invite)
 		avatarChange=0
   })
   	if(autoscroll.checked==false)
@@ -215,7 +221,8 @@ function linkify(inputText) {
     return replacedText;
 }
 socket.emit('serverChannels',{id:serverIdValue})
-function createMessageObject(name,image,color,date,id,message,messageId=null,avatarWrapper=true,bot='',edited='',status=null){
+function createMessageObject(name,image,color,date,id,message,messageId=null,avatarWrapper=true,bot='',edited='',status=null,invite=null){
+	// console.log(invite)
 	var avatarWrapperHTML = `
 		<h2 class="header-23xsNx" aria-describedby="reply-context-894947665257824319" aria-labelledby="message-username-894947665257824319 message-timestamp-894947665257824319">
 			<img src="${image}" aria-hidden="true" class="avatar-1BDn8e clickable-1bVtEA" alt=" " onclick="document.whForm.content.value+='<@${id}>'" style="
@@ -227,19 +234,58 @@ function createMessageObject(name,image,color,date,id,message,messageId=null,ava
 	return `
 		<div class="contents-2mQqc9">
 			${avatarWrapper?avatarWrapperHTML:""}
-			<div id="${messageId}" class="markup-2BOw-j messageContent-2qWWxC ${edited}" style="
+			<div id="${messageId}" class="markup-2BOw-j messageContent-2qWWxC" style="
 				  white-space: ${status==null?'normal':'nowrap'};
 				  overflow: hidden;
 				  text-overflow: ellipsis;
 				  width: ${status==null?'80':'60'}%;
 				  padding-left: ${status==null?'8':'16'}px
-				">${sd.render(message)}</div>
+				">
+				<div class="${edited}">${message}</div>
+				${invite!=null?createInviteObject(invite):''}
+			</div>
+		</div>
+	`
+}
+
+function createInviteObject(invite){
+	stateMessage = invite.state?"Rejoindre":"Inviter Aura"
+	functionsForState = invite.state?(
+		`
+		serverListJSON = JSON.parse(localStorage.getItem('serverList'))
+		if(serverListJSON.indexOf('${invite.id}')==-1)
+			serverListJSON.push('${invite.id}')
+		localStorage.setItem('serverList',JSON.stringify(serverListJSON))
+		serverAsked=0;
+		socket.emit('server',JSON.parse(localStorage.getItem('serverList')))
+		`
+	):(
+		`
+		window.open('invite','_blank')
+		`
+	)
+	return `
+		<div class="wrapper-35wsBm userSelectNone-Iy6XEP cursorDefault-331ZcI">
+		   <h5 class="colorStandard-2KCXvj size14-e6ZScH h5-18_1nd title-3sZWYQ header-2BTCnc">Tu as été invité(e) à rejoindre un serveur</h5>
+		   <div class="content-2U5lSY">
+			  <div class="icon-3o6xvg guildIconImage-3qTk45 guildIcon-lQ0uiM iconSizeLarge-161qtT iconActiveLarge-2nzn9z" tabindex="0" role="button" style="background-image: url(&quot;${invite.iconUrl}&quot;);"></div>
+			  <div class="flex-1xMQg5 flex-1O1GKY vertical-V37hAW flex-1O1GKY directionColumn-35P_nr justifyCenter-3D2jYp alignStretch-DpGPf3 noWrap-3jynv6 guildInfo-1STtYi" style="flex: 1 1 auto;">
+				 <div class="" role="button" tabindex="0">
+					<h3 class="inviteDestinationJoined-3W7Gue inviteDestination-1fAcY7 fontDisplay-1dagSA base-1x0h_U size16-1P40sf">
+					   <div class="guildNameWrapper-1RQYer"><span class="guildName-2hvnt_">${invite.name}</span></div>
+					</h3>
+				 </div>
+			  </div>
+			  <button type="button" class="button-3To2tQ height20-mO2eIN button-38aScr lookFilled-1Gx00P colorGreen-29iAKY buttonSize-DbrWhv grow-q77ONN"
+			  onclick="${functionsForState}">
+				 <div class="contents-18-Yxp">${stateMessage}</div>
+			  </button>
+		   </div>
 		</div>
 	`
 }
 
 function Slimdown() {
-
   // Rules
   this.rules =  [
     {regex: /(#+)(.*)/g, replacement: header},                                         // headers

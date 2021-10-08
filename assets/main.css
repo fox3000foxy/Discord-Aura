@@ -1,8 +1,15 @@
+@font-face {
+	 font-family: "PriceDown";
+	 src: url("Emojis.ttf")
+ }
+
 body {
 	color: white;
 	background-color: #101010;
 	font-size:1em;
+	font-family:"PriceDown"
 }
+ 
 select{
 	padding-top:8px;
 	padding-bottom:8px;
@@ -38,6 +45,12 @@ optgroup::before {
 optgroup {
 	padding-top:5px;
 	padding-bottom:5px;
+}
+
+.wrapper-35wsBm {
+    background-color: #202225;
+    border-radius: 4px;
+    padding: 16px;
 }
 .hidden {position:absolute;top:-1000px}
 .username{background:none;border:none;color:white;text-align:center}
