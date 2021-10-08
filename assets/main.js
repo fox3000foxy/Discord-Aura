@@ -131,6 +131,7 @@ setInterval(()=>{
 setInterval(()=>{
   	askMemberList()
 },20000)
+askMemberList()
 
 function addZero(number){
 	return ('0' + number).slice(-2)
