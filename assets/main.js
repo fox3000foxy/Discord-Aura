@@ -165,7 +165,8 @@ socket.on('channelMessages', function(data) {
 				assets.indexOf(".jpg")!=-1 ||
 				assets.indexOf(".jpeg")!=-1 ||
 				assets.indexOf(".gif")!=-1 ||
-				assets.indexOf(".bmp")!=-1
+				assets.indexOf(".bmp")!=-1 ||
+				assets.indexOf(".webp")!=-1 
 			)
 		)	
 		{
@@ -209,7 +210,8 @@ function linkify(inputText) {
 			replacedText.indexOf(".jpg")!=-1 ||
 			replacedText.indexOf(".jpeg")!=-1 ||
 			replacedText.indexOf(".gif")!=-1 ||
-			replacedText.indexOf(".bmp")!=-1
+			replacedText.indexOf(".bmp")!=-1 ||
+			replacedText.indexOf(".webp")!=-1
 		)
 	)
 	{
