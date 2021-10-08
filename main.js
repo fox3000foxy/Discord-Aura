@@ -202,7 +202,7 @@ socket.on('wh', function(data) {
 
 function linkify(inputText) {
     var replacedText, replacePattern1, replacePattern2, replacePattern3;
-    replacePattern1 = /(\b(https?|http?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+    replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
     replacedText = inputText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
 	if(
 		replacedText.indexOf("href")!=-1 && (
