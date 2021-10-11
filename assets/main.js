@@ -81,7 +81,7 @@ function askMemberList(){
 		if(members.id == serverId.value)
 		document.getElementById("serverMembers").innerHTML = ""
 		members.membersArray.forEach((member)=>{
-			document.getElementById("serverMembers").innerHTML += createMessageObject(member.username,member.avatarURL,member.color,'',member.id,member.activity||'<br>',null,true,'','',statusColor(member.status))
+			document.getElementById("serverMembers").innerHTML += createMessageObject(member.username,member.avatarURL,member.color=="#000000"?"white":member.color,'',member.id,member.activity||'<br>',null,true,'','',statusColor(member.status))
 			// `
 				// <div>
 					// <img src="${member.avatarURL}" style="width:40px;height:40px;border-radius:50%;border: 2px solid green">
