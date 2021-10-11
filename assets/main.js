@@ -124,13 +124,7 @@ socket.on('serverChannels', function(msg) {
 	}
 });
 
-setInterval(()=>{
-  	if(autoscroll.checked==true)
-		messageContainer.scrollTop = 100000
-})
-
 askMemberList()
-
 function addZero(number){
 	return ('0' + number).slice(-2)
 }
