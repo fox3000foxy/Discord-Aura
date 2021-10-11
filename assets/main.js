@@ -183,7 +183,7 @@ socket.on('channelMessages', function(data) {
 		 )
 		if(oldUser!=msg.author) avatarChange=1
 		oldUser = msg.author
-		messageContainer.innerHTML += createMessageObject(msg.author,msg.avatar,member.color=="#000000"?"white":member.color,formattedDate,msg.id,linkify(message) + assets,msg.messageId,!!avatarChange,bot,edited,null,msg.invite)
+		messageContainer.innerHTML += createMessageObject(msg.author,msg.avatar,msg.color=="#000000"?"white":msg.color,formattedDate,msg.id,linkify(message) + assets,msg.messageId,!!avatarChange,bot,edited,null,msg.invite)
 		avatarChange=0
   })
   	if(autoscroll.checked==false)
