@@ -1,5 +1,5 @@
 const express = require('express')
-const { Client, Intents, MessageAttachment } = require('discord.js');
+const { Client, Intents, MessageAttachment, Collection } = require('discord.js');
 // const emojify = require("discord-emojify");
 const cors = require('cors')
 const client = new Client();
@@ -208,11 +208,20 @@ io.on('connection', (socket) => {
 	  var memberListArray = []
 	  guildList = [...client.guilds.cache]
 	  await guildList.forEach(async (guild)=>{
-		  // console.log(msg.id)
-		  if(guild[0]==msg.id)
-			  await guild[1].members.fetch()
-			  .then(r=>{
-				  membersArray = [...r]
+		  if(guild[0]==msg.id){
+				var members = guild[1].members.cache
+				// const sortedRoles = guild[1]._sortedRoles().keyArray();
+				// const rolePos = roleId => sortedRoles.indexOf(roleId);
+				// const highestRolePos = member =>
+				  // Math.max(...member.roles.cache.keyArray().map(roleId => rolePos(roleId)));
+				// const newSort = new Collection(
+				  // [...members.entries()].sort(
+					// ([, prev], [, member]) => highestRolePos(member) - highestRolePos(prev)
+				  // )
+				// );
+				// console.log(newSort)
+				  // membersArray = [...newSort]
+				  membersArray = [...members]
 				  membersArray.forEach((member)=>{
 					  var member = member[1]
 					  var activities = member.presence.activities
@@ -240,12 +249,16 @@ io.on('connection', (socket) => {
 						role: member.roles.cache.first().name,
 					})
 				  })
-			  })
 			  .catch(console.error);
+			  }
 	  })
 	  io.emit("memberList",{id:msg.id,membersArray:memberListArray.sort(function(a, b){
 		if(a.username < b.username) { return -1}
-		if(a.username > b.username) { return 1 }
+		if(a.username> b.username) { return 1 }
+		return 0
+	}).sort(function(a, b){
+		if(a.color < b.color) { return -1}
+		if(a.color> b.color) { return 1 }
 		return 0
 	})})
   });
