@@ -136,6 +136,12 @@ socket.on('channelMessages', function(data) {
 		selectChannel.value != data.channelId
 	) return
 	messageContainer.innerHTML = ''
+	if(data.error){
+		console.error(data.error);
+		return
+	}
+	if(data.topic==null) document.getElementById('channelTopic').innerHTML = ""
+	else document.getElementById('channelTopic').innerHTML = data.topic
 	data.messageArray.forEach(msg=>{
 		// console.log(msg.invite)
 		var message = msg.content
@@ -186,9 +192,9 @@ socket.on('channelMessages', function(data) {
 		messageContainer.innerHTML += createMessageObject(msg.author,msg.avatar,msg.color=="#000000"?"white":msg.color,formattedDate,msg.id,linkify(message) + assets,msg.messageId,!!avatarChange,bot,edited,null,msg.invite)
 		avatarChange=0
   })
-  	if(autoscroll.checked==false)
-		messageContainer.scrollTop -= messageContainer.children[messageContainer.children.length - 1].offsetHeight + 22
-
+  	// if(autoscroll.checked==false)
+		// messageContainer.scrollTop -= messageContainer.children[messageContainer.children.length - 1].offsetHeight + 22
+		messageContainer.scrollTop = 10000000000
 });
 socket.on('wh', function(data) {
 	if(data.error) alert("Error:\n"+data.error.message)
@@ -287,11 +293,13 @@ function createInviteObject(invite){
 function Slimdown() {
   // Rules
   this.rules =  [
-    {regex: /(#+)(.*)/g, replacement: header},                                         // headers
-    {regex: /(\*\*)(.*?)\1/g, replacement: '<strong>$2</strong>'},                  // bold
-    {regex: /(__)(.*?)\1/g, replacement: '<u>$2</u>'},                  				// bold
-    {regex: /\~\~(.*?)\~\~/g, replacement: '<del>$1</del>'},                           // del
-    {regex: /`(.*?)`/g, replacement: '<code>$1</code>'},                               // inline code
+    {regex: /(\*\*)(.*?)\1/g, replacement: '<strong>$2</strong>'},                     // bold
+    {regex: /(_)(.*?!\s)(_)\1/g, replacement: '<u>$2</u>'},                  			   // bold
+    {regex: /(\*)(.*?!\s)(\*)\1/g, replacement: '<u>$2</u>'},                  			   // bold
+    {regex: /(\~\~)(.*?)(\~\~)/g, replacement: '<del>$2</del>'},                           // del
+    {regex: /^`{3}([\S]+)?\n([\s\S]+)\n`{3}/g, replacement: `<code class="scrollbarGhostHairline-1mSOM1 scrollbar-3dvm_9 hljs">$2</code>`},         // inline code
+	{regex: /^`{3}([\S]+)?\s([\s\S]+)`{3}/g, replacement: `<code class="scrollbarGhostHairline-1mSOM1 scrollbar-3dvm_9 hljs">$2</code>`},         // inline code
+    {regex: /`(.*?)`/g, replacement: '<code class="inline">$1</code>'},                            // inline code
   ];
 
   // Add a rule.

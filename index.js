@@ -1,13 +1,15 @@
 const express = require('express')
-const { Client, Intents } = require('discord.js');
+const { Client, Intents, MessageAttachment } = require('discord.js');
 // const emojify = require("discord-emojify");
 const cors = require('cors')
 const client = new Client();
 const app = express()
 const http = require('http');
+const fs = require('fs');
 const server = http.createServer(app);
 const port = process.env.PORT || 3000
 const { Server } = require("socket.io");
+var bodyParser = require('body-parser')
 const io = new Server(server);
 app.use(cors())
 client.once('ready', () => {
@@ -16,46 +18,22 @@ client.once('ready', () => {
 		console.log(`Example app listening at http://localhost:${port}`)
 	})
 });
+
 //Vous voulez savoir votre rang, faire une commande d'un bot, c'est ici :)
 //Merci de ne pas taper la discut ici :smile: !
 client.on('message',(msg)=>{
-		ct=0
-	 if (msg.mentions.has(client.user)) {
+		if (msg.mentions.has(client.user)) {
 		 if(msg.member.hasPermission("ADMINISTRATOR")){
 			// console.log(msg.channel.topic)
 			if(msg.content.indexOf(" get")!=-1) msg.channel.send(`L'id de votre guild est: ${msg.guild.id}.`);
-			else msg.channel.send(`
+			else if(msg.content.indexOf(" help")!=-1) msg.channel.send(`
 				Pingez moi avec une de ces commandes pour les exécuter:
 • **get**: Permet d'obtenir l'ID du serveur.
 
 Vous pouvez aussi rajouter un \\🚫 dans le nom, la catégorie ou la description de chaque salon que vous voulez cacher.
 			`);
-/* 			else if(msg.content.indexOf(" unlock")!=-1) {
-				if(msg.channel.topic.indexOf(":green_circle:")==-1){
- 					var newTopic;
-					if(msg.channel.topic.indexOf(":red_circle:")!=-1) newTopic = msg.channel.topic.split(":red_cirle: ")[1]
-					else newTopic = msg.channel.topic
-					// console.log('unlocking')
-					msg.channel.setTopic(':green_circle: '+newTopic)
-						.then(updated => {msg.channel.send(`Salon unlock.`)})
-				}
-				else msg.channel.send(`Salon déjà unlock.`)
-			}
-			else if(msg.content.indexOf(" lock")!=-1) {
-				if(msg.channel.topic.indexOf(":red_circle:")==-1){
- 					var newTopic;
-					if(msg.channel.topic.indexOf(":green_circle:")!=-1) newTopic = msg.channel.topic.split(":green_cirle: ")[1]
-					else newTopic = msg.channel.topic
-					// console.log(newTopic)
-					msg.channel.setTopic(':red_circle: '+newTopic)
-						.then(updated => {msg.channel.send(`Salon lock.`)})
-				}
-				else msg.channel.send(`Salon déjà lock.`)
-			} */
 		 }
-		 else {
-			msg.channel.send(`Vous n'êtes pas administrateur de votre guilde.`);
-		 }
+		 else {msg.channel.send(`Vous n'êtes pas administrateur de votre guilde.`);}
       }
 	sendChannelMessages({id:msg.channel.id,limit:100})
 })
@@ -82,11 +60,17 @@ async function sendChannelMessages(msg) {
 		guild = client.guilds.cache.get(id)
 		guild.fetchInvites().then((result)=>{guildsInvites.push(result)})
 	})
+	var topicChannel = client.channels.cache.get(msg.id).topic
+	// console.log("Topic:",topicChannel)
 	var inviteGuild = client.channels.cache.get(msg.id).guild.fetchInvites()
 	client.channels.cache.get(msg.id).messages.fetch({ limit: parseInt(msg.limit) })
 		.then(async msgs => {
 		  var fetchedArray = []
 		  msgList = [...msgs].reverse()
+		  if(msgList.length == 0) {
+			io.emit('channelMessages',{messageArray:fetchedArray,channelId:msg.id,topic:topicChannel})
+			return;
+		  }
 		  msgList.forEach(async (msgElem,i)=>{
 					var msg = msgElem[1]
 					var color = "#ffffff"
@@ -140,10 +124,14 @@ async function sendChannelMessages(msg) {
 					  invite:inviteLink
 				   })
 			   if(i==msgList.length-1){
-				 await io.emit('channelMessages',{messageArray:fetchedArray,channelId:msg.channel.id})
+				// console.log(msg.channel.topic)
+				 await io.emit('channelMessages',{messageArray:fetchedArray,channelId:msg.channel.id,topic:topicChannel})
 			   } 
 		  })
-		}).catch((e)=>{});
+		}).catch((e)=>{
+			console.log(e)
+			io.emit('channelMessages',{error:e})
+		});
   }
 
 io.on('connection', (socket) => {
@@ -204,9 +192,12 @@ io.on('connection', (socket) => {
 	}
 	const webhook = webhooks.first();
 	await webhook.send({
-		content: msg.content,
+		content: msg.content.split("@everyone").join("everyone").split("@here").join("here"),
 		username: msg.username || 'Aura User',
-		avatarURL: msg.avatar || 'https://discord-aura.herokuapp.com/default.png'
+		avatarURL: msg.avatar || 'https://discord-aura.herokuapp.com/default.png',
+		allowed_mentions: {
+			"parse": ["users"]
+		}
 	}).then(()=>{
 		io.emit('wh',{message:'sended hook !'})
 	}).catch(e=>{
@@ -260,10 +251,35 @@ io.on('connection', (socket) => {
   });
   socket.on('disconnect', () => {});
 });
-
 app.get('/', (req, res) => {res.sendFile(__dirname+'/webhook.html')})
 app.get('/bot.png', (req, res) => {res.sendFile(__dirname+'/bot.png')})
-app.use(express.static('./assets'))
 app.get('/invite', (req, res) => {res.redirect('https://discord.com/api/oauth2/authorize?client_id=894822773321510932&permissions=8&scope=bot')})
+// app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.post('/upload', function (req, res) {
+	// console.log(req.body)
+	// var regex = /^data:.+\/(.+);base64,(.*)$/;
+
+	// var matches = req.body.match(regex);
+	// var ext = matches[1];
+	// var data = matches[2];
+	// var buffer = Buffer.from(data, 'base64');
+	// var fileName = new Date().getTime()
+	buffer = req.body.file
+	arrayBuffer = Uint8Array.from(buffer.split(","))
+	response = {message:'ok'}
+	const attachment = new MessageAttachment(Buffer.from(arrayBuffer), req.body.fileName)
+	console.log("Sender:",req.body.sender)
+	var sender = "Un utilisateur d'aura";
+	if(req.body.sender!='')
+		sender = req.body.sender
+	client.channels.cache.get(req.body.channel).send(('**'+sender+'** a envoye une piece jointe:'),attachment)
+	// console.log(response)
+	res.send(response);
+});
+// app.get('uploadFile',(req,res)=>{
+	// console.log(req.query.name)
+// })
+app.use(express.static('./assets'))
 // Login to Discord with your client's token
 client.login("ODk0ODIyNzczMzIxNTEwOTMy."+"YVvmpg.puEmuZ-F8KZ9hOfjnM45LG8T0qw")

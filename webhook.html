@@ -1,8 +1,9 @@
-<html class="theme-dark">
+<html class="theme-dark" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
 <title>Aura UI</title>
 <link rel="stylesheet" href="buttons.css">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="main.css">
+<div id="dropZone" style="display:none" ondragleave="dropZone.style.display='none'"></div>
 <div align="center">
 	<table>
 		<form onsubmit='
@@ -39,7 +40,8 @@
 			localStorage.setItem('selectedChannel',this.selectedIndex);
 			askChannels();
 			messageContainer.innerHTML = ''
-			document.getElementById('channelName').innerHTML = `<b style='color:gray'># </b>`+selectChannel.selectedOptions[0].innerText
+			document.getElementById('channelName').innerHTML = `<b style='color:gray'># </b>`+selectChannel.selectedOptions[0].innerText;
+			document.getElementById('channelTopic').innerHTML = ''
 		" style="
 			position:absolute;
 			left:64px;
@@ -81,9 +83,21 @@
 			left:20%;
 			top:0;
 			width:60%;
-			height:32px;
+			height:37px;
 			text-align:left;
 			background: #4f545c;
+			padding-left:3%;
+			padding-top: calc(13px);
+		">
+		</div>
+		<div id="channelTopic"
+		style="
+			position:absolute;
+			left:20%;
+			top:15px;
+			width:60%;
+			height:32px;
+			text-align:left;
 			padding-left:3%;
 			padding-top: calc(18px);
 		">
@@ -108,4 +122,5 @@
 <script src="/prompt.js"></script>
 <script src="/emojiList.js"></script>
 <script src="/main.js"></script>
+<script src="/drop.js"></script>
 </html>

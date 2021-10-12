@@ -1,0 +1,2 @@
+Zip and POST: https://stackoverflow.com/questions/38572949/uploading-a-zip-file-using-post-in-javascript-fails-silently
+POST with fetch: https://stackoverflow.com/questions/39565706/post-request-with-fetch-api
