@@ -75,7 +75,10 @@ async function sendChannelMessages(msg) {
 					var msg = msgElem[1]
 					var color = "#ffffff"
 					var name = msg.author.username
-				  if(msg.attachments.first() != undefined) var attachment = msg.attachments.first().url
+				  if(msg.attachments.first() != undefined) var attachment = {
+					name:msg.attachments.first().name,
+					url:msg.attachments.first().url
+				  }
 				  var formattedMsg = msg.content
 				  arrayOfMentions = [...msg.mentions.users]
 				  arrayOfMentions.forEach((user,i)=>{

@@ -158,7 +158,8 @@ socket.on('channelMessages', function(data) {
 				message = message.split(":"+key+":").join("<span style='font-size:18px'>&#x"+listOfEmoji[key].split("U+")[1]+";</span>")
 		}
 		var assets = '',newMessage = '',edited = '', bot = ''
-		if(msg.attachment) assets = ` <a href="${msg.attachment}" target="_blank">Voir les pièces jointes</a>`
+		// if(msg.attachment) assets = ` <a href="${msg.attachment}" target="_blank">Voir les pièces jointes</a>`
+		if(msg.attachment) assets = createAttachment(msg.attachment.name,msg.attachment.url)
 		if(
 			assets.indexOf("href")!=-1 && (
 				assets.indexOf(".png")!=-1 ||
@@ -285,6 +286,27 @@ function createInviteObject(invite){
 			  onclick="${functionsForState}">
 				 <div class="contents-18-Yxp">${stateMessage}</div>
 			  </button>
+		   </div>
+		</div>
+	`
+}
+
+function createAttachment(name,url){
+	return `
+		<div id="message-accessories-897719792818090014" class="container-1ov-mD">
+		   <div class="messageAttachment-1aDidq">
+			  <div class="attachment-33OFj0 horizontal-2EEEnY flex-1O1GKY directionRow-3v3tfG alignCenter-1dQNNs embedWrapper-lXpS3L">
+				 <img class="icon-1kp3fr" src="7b3a37fa249a857b0ff136db0a73f44c.svg" alt="Type de fichier joint&nbsp;: unknown" title="unknown">
+				 <div class="attachmentInner-3vEpKt">
+					<div class="filenameLinkWrapper-1-14c5"><a class="anchor-3Z-8Bb anchorUnderlineOnHover-2ESHQB fileNameLink-9GuxCo" href="${url}" rel="noreferrer noopener" target="_blank">${name}</a></div>
+					<div class="metadata-3WGS0M size12-3R0845 height16-2Lv3qA">61.05 KB</div>
+				 </div>
+				 <a class="anchor-3Z-8Bb anchorUnderlineOnHover-2ESHQB downloadWrapper-vhAtLx" href="${url}" rel="noreferrer noopener" target="_blank">
+					<svg class="downloadButton-23tKQp" aria-hidden="false" width="24" height="24" viewBox="0 0 24 24">
+					   <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M16.293 9.293L17.707 10.707L12 16.414L6.29297 10.707L7.70697 9.293L11 12.586V2H13V12.586L16.293 9.293ZM18 20V18H20V20C20 21.102 19.104 22 18 22H6C4.896 22 4 21.102 4 20V18H6V20H18Z"></path>
+					</svg>
+				 </a>
+			  </div>
 		   </div>
 		</div>
 	`
