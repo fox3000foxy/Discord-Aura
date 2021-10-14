@@ -1,4 +1,4 @@
-@font-face {
+﻿@font-face {
 	 font-family: "PriceDown";
 	 src: url("Emojis.ttf")
  }
@@ -118,4 +118,86 @@ input{
 				url('../uploadbox.png');
 	background-repeat: no-repeat;
 	background-position: center;
+}
+
+/* Style for every Element now */
+
+input[name="content"]{
+	width:60%;
+	position:absolute;
+	left:20%;
+	bottom: 0px;
+	background:#4f545c;
+	color:#dcddde;
+	border:1px solid transparent	
+}
+
+#channelTopic{
+	position:absolute;
+	left:20%;
+	top:15px;
+	width:60%;
+	height:32px;
+	text-align:left;
+	padding-left:3%;
+	padding-top: calc(18px);
+}
+
+#channelName{
+	position:absolute;
+	left:20%;
+	top:0;
+	width:60%;
+	height:37px;
+	text-align:left;
+	background: #36393f;
+	padding-left:3%;
+	padding-top: calc(13px);
+	border-bottom: 1px solid black;
+}
+
+#messageContainer {
+	text-align:left;
+	height:calc(100% - 50px - 60px);
+	overflow-y:scroll;
+	overflow-x: hidden;
+	padding-top:10px; 
+	padding-bottom:10px; 
+	padding-right:20px; 
+	width:60%;
+	background-color: #36393f;
+	display:block; 
+	position: absolute;
+	top:50px;
+	left:20%
+}
+
+#channelNames {
+	position:absolute;
+	left:64px;
+	width:calc(20% - 64px);
+	top:50px;
+	height:calc( 85% + 43px - 50px);
+	background:#2f3136;
+	border-color:#2f3136;
+	color:white;
+}
+
+#serverName {
+	position:absolute;
+	left:64px;
+	top:0px;
+	width:calc(20% - 64px);
+	height:35px;
+	padding-top:15px;
+	background:#2f3136;
+	border-bottom: 1px solid black;
+}
+#serverList{
+	position:absolute;
+	left:0;
+	top:0;
+	background:#202225;
+	width:64px;
+	height:100%
 }

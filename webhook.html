@@ -17,7 +17,7 @@
 		this.content.value=""
 		return false
 		' method="GET" name="whForm">
-		<div id="serverList" style="position:absolute;left:0;top:0;background:#202225;width:64px;height:100%"></div>
+		<div id="serverList"></div>
 		<div style="position:absolute;top:-1000px">
 			<input name="avatar_url" onchange="localStorage.setItem('avatar_url',this.value);document.getElementById('image').src=this.value"><br />
 			<input id="serverId" onchange="
@@ -27,31 +27,14 @@
 			" type="number"><br>
 			<input type="checkbox" id="autoscroll" checked="true"> Autoscroll
 		</div>
-		<div id="serverName" style="
-			position:absolute;
-			left:64px;
-			top:0px;
-			width:calc(20% - 64px);
-			height:50px;
-			padding-top:15px
-		">
-		</div>
 		<select id="channelNames" multiple onchange="
 			localStorage.setItem('selectedChannel',this.selectedIndex);
 			askChannels();
 			messageContainer.innerHTML = ''
 			document.getElementById('channelName').innerHTML = `<b style='color:gray'># </b>`+selectChannel.selectedOptions[0].innerText;
 			document.getElementById('channelTopic').innerHTML = ''
-		" style="
-			position:absolute;
-			left:64px;
-			width:calc(20% - 64px);
-			top:50px;
-			height:calc( 85% + 43px - 50px);
-			background:#2f3136;
-			border-color:#2f3136;
-			color:white;
 		"></select>
+		<div id="serverName"></div>
 		<div style="text-align:center;position:absolute;left:64px;bottom:0;background:#36393f;width:calc(20% - 64px);height:calc(15% - 43px);padding-top:10px">
 			<img id="image" width="64px" height="64px" onclick="
 			linkOfPP = prompt('Lien de la photo de profile',this.src)
@@ -61,58 +44,12 @@
 			" alt="Photo de profile" onerror="this.src='default.png'" style="border-radius:32px"><br>
 			<input name="username" style="width:100%" onchange="localStorage.setItem('username',this.value)" class="username" placeholder="Nom d'utilisateur"><br /><br />
 		</div>
-		<div id="messageContainer" onscroll="autoScrollUpdate()" style="
-			text-align:left;
-			height:calc(100% - 50px - 60px);
-			overflow-y:scroll;
-			overflow-x: hidden;
-			padding-top:10px; 
-			padding-bottom:10px; 
-			padding-right:20px; 
-			width:60%;
-			background-color: #36393f;
-			display:block; 
-			position: absolute;
-			top:50px;
-			left:20%">
-			Messages loading... Please wait...
-		</div>
-		<div id="channelName"
-		style="
-			position:absolute;
-			left:20%;
-			top:0;
-			width:60%;
-			height:37px;
-			text-align:left;
-			background: #4f545c;
-			padding-left:3%;
-			padding-top: calc(13px);
-		">
-		</div>
-		<div id="channelTopic"
-		style="
-			position:absolute;
-			left:20%;
-			top:15px;
-			width:60%;
-			height:32px;
-			text-align:left;
-			padding-left:3%;
-			padding-top: calc(18px);
-		">
-		</div>
+		<div id="messageContainer">Messages loading... Please wait...</div>
+		<div id="channelName"></div>
+		<div id="channelTopic"></div>
 		<div id="serverMembers" onclick="askMemberList()" style="display:block;overflow-x: hidden;text-align:left;position:absolute;left:80%;top:0;width:20%;height:100%;background:#202225">
 		</div>
-		<input autocomplete="off" name="content" style="
-			width:60%;
-			position:absolute;
-			left:20%;
-			bottom: 0px;
-			background:#4f545c;
-			color:#dcddde;
-			border:1px solid transparent
-		" placeholder="Envoyez un message... Cliquez sur un profil ou une mention pour mentionner..."><br />
+		<input autocomplete="off" name="content" placeholder="Envoyez un message... Cliquez sur un profil ou une mention pour mentionner..."><br />
 		<input type="submit">
 	</form>
 </table>

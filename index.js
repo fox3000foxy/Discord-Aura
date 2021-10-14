@@ -53,6 +53,7 @@ function toTitleCase(str) {
 }
 
 async function sendChannelMessages(msg) {
+	var emojisList = []
 	// if(client.channels.cache.get(msg.id)!=undefined)
 	var guilds = client.guilds.cache.map(g => g.id)
 	var guildsInvites = []
@@ -63,6 +64,12 @@ async function sendChannelMessages(msg) {
 	var topicChannel = client.channels.cache.get(msg.id).topic
 	// console.log("Topic:",topicChannel)
 	var inviteGuild = client.channels.cache.get(msg.id).guild.fetchInvites()
+	client.channels.cache.get(msg.id).guild.emojis.cache.forEach((emoji)=>{
+		emojisList.push({
+			regex:"<:"+emoji.name+":"+emoji.id+">",
+			replacement:emoji.url
+		})
+	})
 	client.channels.cache.get(msg.id).messages.fetch({ limit: parseInt(msg.limit) })
 		.then(async msgs => {
 		  var fetchedArray = []
@@ -113,6 +120,14 @@ async function sendChannelMessages(msg) {
 								}
 							})
 					})
+					var embed = null
+					if(msg.embeds.length!=0)
+						embed = {
+							author:msg.embeds[0].author.name,
+							avatar:msg.embeds[0].author.iconURL,
+							message:msg.embeds[0].description,
+							color:msg.embeds[0].color
+						}
 				  await fetchedArray.push({		  
 					  author:name,
 					  timestamp: msg.createdTimestamp,
@@ -124,11 +139,13 @@ async function sendChannelMessages(msg) {
 					  content: formattedMsg,
 					  color:color,
 					  editedTimestamp: msg.editedTimestamp,
-					  invite:inviteLink
+					  invite:inviteLink,
+					  embed
 				   })
+				   // console.log(msg.embeds)
 			   if(i==msgList.length-1){
 				// console.log(msg.channel.topic)
-				 await io.emit('channelMessages',{messageArray:fetchedArray,channelId:msg.channel.id,topic:topicChannel})
+				 await io.emit('channelMessages',{messageArray:fetchedArray,channelId:msg.channel.id,topic:topicChannel,emojisList})
 			   } 
 		  })
 		}).catch((e)=>{
@@ -213,17 +230,6 @@ io.on('connection', (socket) => {
 	  await guildList.forEach(async (guild)=>{
 		  if(guild[0]==msg.id){
 				var members = guild[1].members.cache
-				// const sortedRoles = guild[1]._sortedRoles().keyArray();
-				// const rolePos = roleId => sortedRoles.indexOf(roleId);
-				// const highestRolePos = member =>
-				  // Math.max(...member.roles.cache.keyArray().map(roleId => rolePos(roleId)));
-				// const newSort = new Collection(
-				  // [...members.entries()].sort(
-					// ([, prev], [, member]) => highestRolePos(member) - highestRolePos(prev)
-				  // )
-				// );
-				// console.log(newSort)
-				  // membersArray = [...newSort]
 				  membersArray = [...members]
 				  membersArray.forEach((member)=>{
 					  var member = member[1]
@@ -270,17 +276,8 @@ io.on('connection', (socket) => {
 app.get('/', (req, res) => {res.sendFile(__dirname+'/webhook.html')})
 app.get('/bot.png', (req, res) => {res.sendFile(__dirname+'/bot.png')})
 app.get('/invite', (req, res) => {res.redirect('https://discord.com/api/oauth2/authorize?client_id=894822773321510932&permissions=8&scope=bot')})
-// app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.post('/upload', function (req, res) {
-	// console.log(req.body)
-	// var regex = /^data:.+\/(.+);base64,(.*)$/;
-
-	// var matches = req.body.match(regex);
-	// var ext = matches[1];
-	// var data = matches[2];
-	// var buffer = Buffer.from(data, 'base64');
-	// var fileName = new Date().getTime()
 	buffer = req.body.file
 	arrayBuffer = Uint8Array.from(buffer.split(","))
 	response = {message:'ok'}
@@ -293,9 +290,6 @@ app.post('/upload', function (req, res) {
 	// console.log(response)
 	res.send(response);
 });
-// app.get('uploadFile',(req,res)=>{
-	// console.log(req.query.name)
-// })
 app.use(express.static('./assets'))
 // Login to Discord with your client's token
 client.login("ODk0ODIyNzczMzIxNTEwOTMy."+"YVvmpg.puEmuZ-F8KZ9hOfjnM45LG8T0qw")

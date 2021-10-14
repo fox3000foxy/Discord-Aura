@@ -1,6 +1,5 @@
 var socket = io();
-if(localStorage.serverList == undefined)
-	localStorage.setItem('serverList',"[]")
+if(localStorage.serverList == undefined) localStorage.setItem('serverList',"[]")
 serverIdValue = location.href.indexOf('?id=')!=-1?location.href.split('?id=')[1]:localStorage.getItem("serverId")
 first = true;
 changing = 1;
@@ -10,7 +9,6 @@ serverListElem = document.getElementById("serverList")
 serverId = document.getElementById("serverId")
 askForServerChannels= function(serverId){socket.emit('serverChannels',{id:serverId})}
 askChannels = function (){socket.emit('channelMessages',{id:selectChannel.value,limit:100})}
-
 document.whForm.username.value = localStorage.getItem("username")
 document.whForm.avatar_url.value = localStorage.getItem("avatar_url")
 document.getElementById('image').src=localStorage.getItem("avatar_url")
@@ -20,11 +18,6 @@ autoscroll = document.getElementById("autoscroll")
 avatarChange = 1
 serverAsked = 0
 autoscrollBool = true
-function autoScrollUpdate(){
-	if(messageContainer.scrollHeight - messageContainer.scrollTop == messageContainer.offsetHeight) 
-	{autoscroll.checked = true}else {autoscroll.checked = false}
-}
-
 serverList = {}
 
 socket.emit("server",JSON.parse(localStorage.getItem("serverList")))
@@ -33,7 +26,6 @@ socket.on("server",(servers)=>{
 	serverListElem.innerHTML = ""
 	if(servers.length!=0) {
 		servers.forEach((server)=>{
-			<!-- console.log(server) -->
 			var alt = server.name.match(/\b(\w)/g).join('')
 			serverListElem.innerHTML += `
 				<img onclick="
@@ -129,7 +121,8 @@ function addZero(number){
 	return ('0' + number).slice(-2)
 }
 
-socket.on('channelMessages', function(data) {
+socket.on('channelMessages', async function(data) {
+	// console.log(data.emojisList)
 	avatarChange = 1
 	if(
 		selectChannel.value == "" || 
@@ -142,8 +135,7 @@ socket.on('channelMessages', function(data) {
 	}
 	if(data.topic==null) document.getElementById('channelTopic').innerHTML = ""
 	else document.getElementById('channelTopic').innerHTML = data.topic
-	data.messageArray.forEach(msg=>{
-		// console.log(msg.invite)
+	await data.messageArray.forEach( (msg,counter)=>{
 		var message = msg.content
 			.replaceAll("<","&lt")
 			.replaceAll(">","&gt")
@@ -190,17 +182,16 @@ socket.on('channelMessages', function(data) {
 		 )
 		if(oldUser!=msg.author) avatarChange=1
 		oldUser = msg.author
-		messageContainer.innerHTML += createMessageObject(msg.author,msg.avatar,msg.color=="#000000"?"white":msg.color,formattedDate,msg.id,linkify(message) + assets,msg.messageId,!!avatarChange,bot,edited,null,msg.invite)
+		messageContainer.innerHTML += createMessageObject(msg.author,msg.avatar,msg.color=="#000000"?"white":msg.color,formattedDate,msg.id,linkify(message) + assets,msg.messageId,!!avatarChange,bot,edited,null,msg.invite,data.emojisList)
+		if(msg.embed!=null)
+		messageContainer.innerHTML += createEmbed(msg.embed.author,msg.embed.avatar,msg.embed.message,'#'+msg.embed.color.toString(16))
 		avatarChange=0
+		messageContainer.scrollTop = messageContainer.scrollHeight * 300
   })
-  	// if(autoscroll.checked==false)
-		// messageContainer.scrollTop -= messageContainer.children[messageContainer.children.length - 1].offsetHeight + 22
-		messageContainer.scrollTop = 10000000000
 });
 socket.on('wh', function(data) {
 	if(data.error) alert("Error:\n"+data.error.message)
 });
-
 function linkify(inputText) {
     var replacedText, replacePattern1, replacePattern2, replacePattern3;
     replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
@@ -227,8 +218,17 @@ function linkify(inputText) {
     return replacedText;
 }
 socket.emit('serverChannels',{id:serverIdValue})
-function createMessageObject(name,image,color,date,id,message,messageId=null,avatarWrapper=true,bot='',edited='',status=null,invite=null){
+function createMessageObject(name,image,color,date,id,message,messageId=null,avatarWrapper=true,bot='',edited='',status=null,invite=null,emojisList=null){
 	// console.log(invite)
+	// console.log(emojisList)
+	// if(emojisList)
+	if(emojisList!=null)
+	emojisList.forEach((emoji)=>{
+		// console.log(message,emoji.regex)
+		emojiExpression = emoji.regex.replaceAll("<","&lt").replaceAll(">","&gt")
+		size = (message == emojiExpression) ? 48 : 22
+		message = message.replaceAll(emojiExpression,'<img src="'+emoji.replacement+'?size='+size+'">') 
+	})
 	var avatarWrapperHTML = `
 		<h2 class="header-23xsNx" aria-describedby="reply-context-894947665257824319" aria-labelledby="message-username-894947665257824319 message-timestamp-894947665257824319">
 			<img src="${image}" aria-hidden="true" class="avatar-1BDn8e clickable-1bVtEA" alt=" " onclick="document.whForm.content.value+='<@${id}>'" style="
@@ -299,7 +299,7 @@ function createAttachment(name,url){
 				 <img class="icon-1kp3fr" src="7b3a37fa249a857b0ff136db0a73f44c.svg" alt="Type de fichier joint&nbsp;: unknown" title="unknown">
 				 <div class="attachmentInner-3vEpKt">
 					<div class="filenameLinkWrapper-1-14c5"><a class="anchor-3Z-8Bb anchorUnderlineOnHover-2ESHQB fileNameLink-9GuxCo" href="${url}" rel="noreferrer noopener" target="_blank">${name}</a></div>
-					<div class="metadata-3WGS0M size12-3R0845 height16-2Lv3qA">61.05 KB</div>
+					<div class="metadata-3WGS0M size12-3R0845 height16-2Lv3qA"></div>
 				 </div>
 				 <a class="anchor-3Z-8Bb anchorUnderlineOnHover-2ESHQB downloadWrapper-vhAtLx" href="${url}" rel="noreferrer noopener" target="_blank">
 					<svg class="downloadButton-23tKQp" aria-hidden="false" width="24" height="24" viewBox="0 0 24 24">
@@ -309,6 +309,29 @@ function createAttachment(name,url){
 			  </div>
 		   </div>
 		</div>
+	`
+}
+function createEmbed(name,url,message,color) {
+	return `
+	<div style="
+				white-space: normal;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				width:80%;
+				padding-left: 68px;
+	">
+		<div class="embedWrapper-lXpS3L embedFull-2tM8-- embed-IeVjo6 markup-2BOw-j" aria-hidden="false" style="border-color: ${color};">
+		   <div class="grid-1nZz7S">
+			  <div class="embedSuppressButton-1FonMn" aria-label="Supprimer toutes les intégrations" role="button" tabindex="0">
+				 <svg aria-hidden="false" width="16" height="16" viewBox="0 0 24 24">
+					<path fill="currentColor" d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z"></path>
+				 </svg>
+			  </div>
+			  <div class="embedAuthor-3l5luH embedMargin-UO5XwE"><img alt="" class="embedAuthorIcon--1zR3L" src="${url}"><span class="embedAuthorName-3mnTWj">${name}</span></div>
+			  <div class="embedDescription-1Cuq9a embedMargin-UO5XwE">${message}</div>
+		   </div>
+		</div>
+	</div>
 	`
 }
 
@@ -323,47 +346,18 @@ function Slimdown() {
 	{regex: /^`{3}([\S]+)?\s([\s\S]+)`{3}/g, replacement: `<code class="scrollbarGhostHairline-1mSOM1 scrollbar-3dvm_9 hljs">$2</code>`},         // inline code
     {regex: /`(.*?)`/g, replacement: '<code class="inline">$1</code>'},                            // inline code
   ];
-
   // Add a rule.
-  this.addRule = function (regex, replacement) {
-    regex.global = true;
-    regex.multiline = false;
-    this.rules.push({regex: regex, replacement: replacement});
-  };
-
+  this.addRule = function (regex, replacement) {regex.global = true;regex.multiline = false;this.rules.push({regex: regex, replacement: replacement});};
   // Render some Markdown into HTML.
-  this.render = function (text) {
-    this.rules.forEach(function (rule) {
-      text = text.replace(rule.regex, rule.replacement);
-    });
-    return text.trim();
-  };
-
-  function para (text, line) {
-    debugger;
-    var trimmed = line.trim();
-    if (/^<\/?(ul|ol|li|h|p|bl)/i.test(trimmed)) {
-      return '\n' + line + '\n';
-    }
-    return '\n<p>' + trimmed + '</p>\n';
-  }
-
-  function ulList (text, item) {
-    return '\n<ul>\n\t<li>' + item.trim() + '</li>\n</ul>';
-  }
-
-  function olList (text, item) {
-    return '\n<ol>\n\t<li>' + item.trim() + '</li>\n</ol>';
-  }
-
-  function blockquote (text, tmp, item) {
-    return '\n<blockquote>' + item.trim() + '</blockquote>';
-  }
-
-  function header (text, chars, content) {
-    var level = chars.length;
-    return '<h' + level + '>' + content.trim() + '</h' + level + '>';
-  }
+  this.render = function (text) {this.rules.forEach(function (rule) {text = text.replace(rule.regex, rule.replacement);});return text.trim();};
+  function para (text, line) {debugger;var trimmed = line.trim();if (/^<\/?(ul|ol|li|h|p|bl)/i.test(trimmed)) {return '\n' + line + '\n';}return '\n<p>' + trimmed + '</p>\n';}
+  function ulList (text, item) {return '\n<ul>\n\t<li>' + item.trim() + '</li>\n</ul>';}
+  function olList (text, item) {return '\n<ol>\n\t<li>' + item.trim() + '</li>\n</ol>';}
+  function blockquote (text, tmp, item) {return '\n<blockquote>' + item.trim() + '</blockquote>';}
+  function header (text, chars, content) {var level = chars.length;return '<h' + level + '>' + content.trim() + '</h' + level + '>';}
 }
 
 var sd = new Slimdown();
+
+messageContainer.onclick = (e)=>{document.whForm.content.focus()}
+document.getElementById('serverMembers').onclick = (e)=>{document.whForm.content.focus()}
