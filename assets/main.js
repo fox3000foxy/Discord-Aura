@@ -184,7 +184,7 @@ socket.on('channelMessages', async function(data) {
 		oldUser = msg.author
 		messageContainer.innerHTML += createMessageObject(msg.author,msg.avatar,msg.color=="#000000"?"white":msg.color,formattedDate,msg.id,linkify(message) + assets,msg.messageId,!!avatarChange,bot,edited,null,msg.invite,data.emojisList)
 		if(msg.embed!=null)
-		messageContainer.innerHTML += createEmbed(msg.embed.author,msg.embed.avatar,msg.embed.message,'#'+msg.embed.color.toString(16))
+		messageContainer.innerHTML += createEmbed(msg.embed.author,msg.embed.avatar,msg.embed.message,msg.embed.color?'#'+msg.embed.color.toString(16):'white')
 		avatarChange=0
 		messageContainer.scrollTop = messageContainer.scrollHeight * 300
   })
