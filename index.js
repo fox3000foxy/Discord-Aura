@@ -122,13 +122,29 @@ async function sendChannelMessages(msg) {
 					})
 					var embed = null
 					if(msg.embeds.length!=0)
-						embed = {
-							author:msg.embeds[0].author.name,
-							avatar:msg.embeds[0].author.iconURL,
-							message:msg.embeds[0].description,
-							color:msg.embeds[0].color
-						}
-				  await fetchedArray.push({		  
+					embed = {
+						author:msg.embeds[0].author.name,
+						avatar:msg.embeds[0].author.iconURL,
+						message:msg.embeds[0].description,
+						color:msg.embeds[0].color
+					}
+					var reference = null
+			
+						// if(msg.reference!=null)
+						// reference = await msg.channel.messages.fetch(msg.reference.messageID).then(async (message)=>{
+							// var repColor = "#ffffff";
+/* 							await msg.guild.members.fetch(message.author.id).then((member)=>{
+								repColor = member.displayHexColor
+							}) */
+							// var ref = {
+								// author: message.author.username,
+								// avatar: message.author.displayAvatarURL(),
+								// color: repColor,
+								// message: message.content
+							// }
+							// return ref;
+						// })
+					await fetchedArray.push({		  
 					  author:name,
 					  timestamp: msg.createdTimestamp,
 					  avatar:msg.author.displayAvatarURL(),
@@ -140,7 +156,8 @@ async function sendChannelMessages(msg) {
 					  color:color,
 					  editedTimestamp: msg.editedTimestamp,
 					  invite:inviteLink,
-					  embed
+					  embed,
+					  reply:msg.reference!=null?msg.reference.messageID:null
 				   })
 				   // console.log(msg.embeds)
 			   if(i==msgList.length-1){
@@ -258,7 +275,6 @@ io.on('connection', (socket) => {
 						role: member.roles.cache.first().name,
 					})
 				  })
-			  .catch(console.error);
 			  }
 	  })
 	  io.emit("memberList",{id:msg.id,membersArray:memberListArray.sort(function(a, b){

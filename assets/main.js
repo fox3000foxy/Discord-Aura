@@ -121,8 +121,9 @@ function addZero(number){
 	return ('0' + number).slice(-2)
 }
 
+messages = []
+
 socket.on('channelMessages', async function(data) {
-	// console.log(data.emojisList)
 	avatarChange = 1
 	if(
 		selectChannel.value == "" || 
@@ -133,9 +134,17 @@ socket.on('channelMessages', async function(data) {
 		console.error(data.error);
 		return
 	}
+	if(location.href.indexOf("limit=")!=-1){
+		limit = parseInt(location.href.split("limit=")[1])
+		if(limit > 100)
+			limit=100
+	}
+	else limit = 100
+	data.messageArray = data.messageArray.reverse().slice(0,limit).reverse()
 	if(data.topic==null) document.getElementById('channelTopic').innerHTML = ""
 	else document.getElementById('channelTopic').innerHTML = data.topic
 	await data.messageArray.forEach( (msg,counter)=>{
+		messages[msg.messageId.toString()] = msg
 		var message = msg.content
 			.replaceAll("<","&lt")
 			.replaceAll(">","&gt")
@@ -164,7 +173,7 @@ socket.on('channelMessages', async function(data) {
 		)	
 		{
 			var link = assets.split('href="')[1].split('"')[0]
-			assets = '<br><img src="'+link+'" class="imageAsset">'
+			assets = '<img src="'+link+'" class="imageAsset">'
 		}
 		if(msg.editedTimestamp!="0") edited = 'modified '
 		if(msg.bot==true) bot = '\t<img src="bot.png">'
@@ -181,8 +190,11 @@ socket.on('channelMessages', async function(data) {
 		  ":"+addZero(date.getMinutes())
 		 )
 		if(oldUser!=msg.author) avatarChange=1
+		if(msg.reply!=null) avatarChange=1
 		oldUser = msg.author
-		messageContainer.innerHTML += createMessageObject(msg.author,msg.avatar,msg.color=="#000000"?"white":msg.color,formattedDate,msg.id,linkify(message) + assets,msg.messageId,!!avatarChange,bot,edited,null,msg.invite,data.emojisList)
+		// messageContainer.innerHTML += createMessageObject(msg.author,msg.avatar,msg.color=="#000000"?"white":msg.color,formattedDate,msg.id,linkify(message) + assets,msg.messageId,!!avatarChange,bot,edited,null,msg.invite,data.emojisList,data.reply)
+		var reply = msg.reply!=null?(Object.keys(messages).indexOf(msg.reply)?messages[msg.reply]:false):null
+		messageContainer.innerHTML += createMessageObject(msg.author,msg.avatar,msg.color=="#000000"?"white":msg.color,formattedDate,msg.id,linkify(message) + assets,msg.messageId,!!avatarChange,bot,edited,null,msg.invite,data.emojisList,reply)
 		if(msg.embed!=null)
 		messageContainer.innerHTML += createEmbed(msg.embed.author,msg.embed.avatar,msg.embed.message,msg.embed.color?'#'+msg.embed.color.toString(16):'white')
 		avatarChange=0
@@ -218,7 +230,7 @@ function linkify(inputText) {
     return replacedText;
 }
 socket.emit('serverChannels',{id:serverIdValue})
-function createMessageObject(name,image,color,date,id,message,messageId=null,avatarWrapper=true,bot='',edited='',status=null,invite=null,emojisList=null){
+function createMessageObject(name,image,color,date,id,message,messageId=null,avatarWrapper=true,bot='',edited='',status=null,invite=null,emojisList=null,reply=null){
 	// console.log(invite)
 	// console.log(emojisList)
 	// if(emojisList)
@@ -229,7 +241,8 @@ function createMessageObject(name,image,color,date,id,message,messageId=null,ava
 		size = (message == emojiExpression) ? 48 : 22
 		message = message.replaceAll(emojiExpression,'<img src="'+emoji.replacement+'?size='+size+'">') 
 	})
-	var avatarWrapperHTML = `
+		// message = message.replace(/(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/gi,"<span style='font-family:PriceDown'>$1</span>")
+		var avatarWrapperHTML = `
 		<h2 class="header-23xsNx" aria-describedby="reply-context-894947665257824319" aria-labelledby="message-username-894947665257824319 message-timestamp-894947665257824319">
 			<img src="${image}" aria-hidden="true" class="avatar-1BDn8e clickable-1bVtEA" alt=" " onclick="document.whForm.content.value+='<@${id}>'" style="
 				border: 3px solid ${status||'transparent'};
@@ -237,8 +250,15 @@ function createMessageObject(name,image,color,date,id,message,messageId=null,ava
 			<span style="padding-left: ${status==null?'8':'16'}px" id="message-username-894947665257824319" class="headerText-3Uvj1Y"><span class="username-1A8OIy desaturateUserColors-1gar-1 clickable-1bVtEA" aria-controls="popout_623" aria-expanded="false" role="button" tabindex="0" style="color: ${color};">${name}</span></span>${bot}<span class="timestamp-3ZCmNB timestampInline-yHQ6fX"><time aria-label="Aujourd’hui à 16:02" id="message-timestamp-894947665257824319" datetime="2021-10-05T14:02:30.721Z"><i class="separator-2nZzUB" aria-hidden="true"> — </i><span style='color:gray;font-size:12px'>${date}</span></time></span>
 		</h2>
 	`
+	if(reply!=false && reply!=null){
+	// console.log(reply.author,reply.avatar,sd.render(reply.content),reply.color)
+	replyText = createReply(reply.author,reply.avatar,sd.render(reply.content),reply.color)
+	}
+	// else if (reply==false)
+	// replyText = createReply(false,false,"Le message n'a pas pu être chargé",false)
 	return `
 		<div class="contents-2mQqc9">
+			${reply!=null?"<br>"+replyText:''}
 			${avatarWrapper?avatarWrapperHTML:""}
 			<div id="${messageId}" class="markup-2BOw-j messageContent-2qWWxC" style="
 				  white-space: ${status==null?'normal':'nowrap'};
@@ -335,16 +355,35 @@ function createEmbed(name,url,message,color) {
 	`
 }
 
+function createReply(name,url,message,color) {
+	// if(url != false)
+		imgText = `
+			<img alt="" src="${url}?size=16" class="replyAvatar-1K9Wmr clickable-1bVtEA">
+	   `
+	  // else imgText=''
+	  // console.log(imgText)
+	return `
+	<div id="message-reply-context-898168989962887198" class="repliedMessage-VokQwo" aria-label="Fox3000 répond à Fox3000" style="margin-left:72px;margin-bottom:-6px">
+		${imgText}
+		<span class="desaturateUserColors-1gar-1 clickable-1bVtEA" aria-controls="popout_2734" aria-expanded="false" role="button" tabindex="0" style="color: ${color};">${name!=false?name:''}</span>
+	   <div class="repliedTextPreview-2NBljf clickable-1bVtEA" role="button" tabindex="0"><span class="repliedTextContent-1R3vnK markup-2BOw-j" style="margin-left:5px">${message}</span></div>
+	</div>
+	`
+	   // <svg class="repliedTextContentIcon-1ivTae" aria-hidden="false" width="24" height="24" viewBox="0 0 24 24">
+		  // <path fill-rule="evenodd" clip-rule="evenodd" d="M6 2C3.79086 2 2 3.79086 2 6V18C2 20.2091 3.79086 22 6 22H18C20.2091 22 22 20.2091 22 18V6C22 3.79086 20.2091 2 18 2H6ZM10 8C10 6.8952 9.1032 6 8 6C6.8944 6 6 6.8952 6 8C6 9.1056 6.8944 10 8 10C9.1032 10 10 9.1056 10 8ZM9 14L6 18H18L15 11L11 16L9 14Z" fill="currentColor"></path>
+	   // </svg>
+}
+
 function Slimdown() {
   // Rules
   this.rules =  [
-    {regex: /(\*\*)(.*?)\1/g, replacement: '<strong>$2</strong>'},                     // bold
-    {regex: /(_)(.*?!\s)(_)\1/g, replacement: '<u>$2</u>'},                  			   // bold
-    {regex: /(\*)(.*?!\s)(\*)\1/g, replacement: '<u>$2</u>'},                  			   // bold
-    {regex: /(\~\~)(.*?)(\~\~)/g, replacement: '<del>$2</del>'},                           // del
-    {regex: /^`{3}([\S]+)?\n([\s\S]+)\n`{3}/g, replacement: `<code class="scrollbarGhostHairline-1mSOM1 scrollbar-3dvm_9 hljs">$2</code>`},         // inline code
-	{regex: /^`{3}([\S]+)?\s([\s\S]+)`{3}/g, replacement: `<code class="scrollbarGhostHairline-1mSOM1 scrollbar-3dvm_9 hljs">$2</code>`},         // inline code
-    {regex: /`(.*?)`/g, replacement: '<code class="inline">$1</code>'},                            // inline code
+    {regex: /(\*\*)(.*?)\1/g, replacement: '<strong>$2</strong>'},
+    {regex: /(_)(.*?!\s)(_)\1/g, replacement: '<u>$2</u>'},
+    {regex: /(\*)(.*?!\s)(\*)\1/g, replacement: '<u>$2</u>'},
+    {regex: /(\~\~)(.*?)(\~\~)/g, replacement: '<del>$2</del>'},
+    {regex: /^`{3}([\S]+)?\n([\s\S]+)\n`{3}/g, replacement: `<code class="scrollbarGhostHairline-1mSOM1 scrollbar-3dvm_9 hljs">$2</code>`},
+	{regex: /^`{3}([\S]+)?\s([\s\S]+)`{3}/g, replacement: `<code class="scrollbarGhostHairline-1mSOM1 scrollbar-3dvm_9 hljs">$2</code>`},
+    {regex: /`(.*?)`/g, replacement: '<code class="inline">$1</code>'},                            
   ];
   // Add a rule.
   this.addRule = function (regex, replacement) {regex.global = true;regex.multiline = false;this.rules.push({regex: regex, replacement: replacement});};
