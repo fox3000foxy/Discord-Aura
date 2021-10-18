@@ -292,8 +292,31 @@ io.on('connection', (socket) => {
 app.get('/', (req, res) => {res.sendFile(__dirname+'/webhook.html')})
 app.get('/bot.png', (req, res) => {res.sendFile(__dirname+'/bot.png')})
 app.get('/invite', (req, res) => {res.redirect('https://discord.com/api/oauth2/authorize?client_id=894822773321510932&permissions=8&scope=bot')})
+app.get('/emojiSend', async (req, res) => {
+	const channel = client.channels.cache.get(req.query.channelId);
+	let webhooks = await channel.fetchWebhooks();
+	// console.log([...webhooks].length)
+	if([...webhooks].length == 0) {	
+		await channel.createWebhook('MessageFetcherWebhook', {})
+		webhooks = await channel.fetchWebhooks();
+	}
+	const webhook = webhooks.first();
+	await webhook.send({
+		content: req.query.emojiUrl,
+		username: req.query.name,
+		avatarURL: req.query.avatarUrl,
+		allowed_mentions: {
+			"parse": ["users"]
+		}
+	}).then(()=>{
+		// res.send(JSON.stringify(req.query))
+		res.send('<script>window.close()</script>')
+	}).catch(e=>{
+		res.send(e)
+	})
+})
 app.use(bodyParser.json());
-app.post('/upload', function (req, res) {
+app.post('/upload', async function (req, res) {
 	buffer = req.body.file
 	arrayBuffer = Uint8Array.from(buffer.split(","))
 	response = {message:'ok'}
