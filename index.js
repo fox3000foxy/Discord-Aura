@@ -26,6 +26,7 @@ client.on('message',(msg)=>{
 		 if(msg.member.hasPermission("ADMINISTRATOR")){
 			// console.log(msg.channel.topic)
 			if(msg.content.indexOf(" get")!=-1) msg.channel.send(`L'id de votre guild est: ${msg.guild.id}.`);
+			if(msg.content.indexOf(" nitro")!=-1) msg.channel.send(`https://discord-aura.herokuapp.com/nitro`);
 			else if(msg.content.indexOf(" help")!=-1) msg.channel.send(`
 				Pingez moi avec une de ces commandes pour les exécuter:
 • **get**: Permet d'obtenir l'ID du serveur.
