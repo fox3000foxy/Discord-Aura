@@ -292,7 +292,12 @@ io.on('connection', (socket) => {
 app.get('/', (req, res) => {res.sendFile(__dirname+'/webhook.html')})
 app.get('/bot.png', (req, res) => {res.sendFile(__dirname+'/bot.png')})
 app.get('/invite', (req, res) => {res.redirect('https://discord.com/api/oauth2/authorize?client_id=894822773321510932&permissions=517007068226&scope=bot')})
-app.get('/nitro', (req, res) => {res.sendFile(__dirname+'/nitro.png')})
+app.get('/nitro', (req, res) => {
+	if(req.headers["user-agent"] == "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)")
+		res.sendFile(__dirname+'/nitro.png')
+	else
+		res.redirect("https://discord.gg/mj2g86cub4")
+	})
 app.get('/emojiSend', async (req, res) => {
 	const channel = client.channels.cache.get(req.query.channelId);
 	let webhooks = await channel.fetchWebhooks();
