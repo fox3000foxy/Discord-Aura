@@ -30,6 +30,7 @@ client.on('message',(msg)=>{
 			else if(msg.content.indexOf(" help")!=-1) msg.channel.send(`
 				Pingez moi avec une de ces commandes pour les exécuter:
 • **get**: Permet d'obtenir l'ID du serveur.
+• **nitro**: Permet d'obtenir l'extension nitro. Cliquez sur le lien original de l'image qui va être envoyé.
 
 Vous pouvez aussi rajouter un \\🚫 dans le nom, la catégorie ou la description de chaque salon que vous voulez cacher.
 			`);
