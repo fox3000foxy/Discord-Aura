@@ -33,7 +33,7 @@ client.on('message',(msg)=>{
 Vous pouvez aussi rajouter un \\🚫 dans le nom, la catégorie ou la description de chaque salon que vous voulez cacher.
 			`);
 		 }
-		 else {msg.channel.send(`Vous n'êtes pas administrateur de votre guilde.`);}
+		else {msg.channel.send(`Vous n'êtes pas administrateur de votre guilde.`);}
       }
 	sendChannelMessages({id:msg.channel.id,limit:100})
 })
