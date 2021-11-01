@@ -339,4 +339,4 @@ app.post('/upload', async function (req, res) {
 });
 app.use(express.static('./assets'))
 // Login to Discord with your client's token
-client.login("ODk0ODIyNzczMzIxNTEwOTMy"+".YVvmpg.pJkwvfUfhWAset5gcQz24ioS4DE")
+client.login("OTA0NzEzMDk1MDE0OTIwMjEz"+".YX_hug.hRrcRNpzwEIryJSTl_92xvDSeKE")
